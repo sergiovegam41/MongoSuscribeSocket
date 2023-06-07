@@ -1,5 +1,3 @@
-// import Note from './models/Note.js';
-
 import { MONGODB_URI, MONGODB_NAME } from './config.js'
 import { MongoClient, ServerApiVersion, ObjectID } from 'mongodb';
 const DATABASE = MONGODB_NAME
@@ -10,6 +8,7 @@ export default (io)=>{
     const Mongoclient = new MongoClient(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
     var ServicesCollection = null
     var professionsCollection = null
+    var notifyMeOrdersCollection = null
 
     Mongoclient.connect(async err => {
       
@@ -17,6 +16,7 @@ export default (io)=>{
 
         ServicesCollection = Mongoclient.db(DATABASE).collection("services");
         professionsCollection = Mongoclient.db(DATABASE).collection("professions");
+        notifyMeOrdersCollection = Mongoclient.db(DATABASE).collection("notifyMeOrders");
   
         const changeStream = ServicesCollection.watch();
 
@@ -50,11 +50,31 @@ export default (io)=>{
 
           socket.emit('server:init', true)
 
-          socket.on("client:getData", async (data = {page: 1, perPage: 10, professionIds: null})=>{
+          socket.on("client:setNotifyMeOrders", async (data = {"notifi":notifi??true,"userID":null})=>{
 
-            let resp = await getCurrentData(data);
-            console.log(resp)
-            socket.emit('server:setData', resp)
+            let notifyMe = await searchOrCreateNotifyMeByUserID(data['userID'])
+            if(notifyMe){
+              const user = await notifyMeOrdersCollection.updateOne({ userID: data['userID'] },{ $set: {  notyfyMe: data['notifi'] } });
+              let notifyMe = await searchOrCreateNotifyMeByUserID(data['userID'])
+
+              socket.emit('server:setNotifyMeOrders', notifyMe.notyfyMe)
+
+            }
+
+
+          })
+
+          socket.on("client:getData", async (data = {paginate: {page: 1, perPage: 10, professionIds: null},userID: null})=>{
+
+            // console.log(data)
+            let resp = await getCurrentData(data['paginate']);
+            let notifyMe = await searchOrCreateNotifyMeByUserID(data['userID'])
+            // console.log(notifyMe)
+
+            if(notifyMe){
+              
+              socket.emit('server:setData', {orders: resp, notifiMeOrders: notifyMe.notyfyMe})
+            }
             
           })
 
@@ -73,6 +93,22 @@ export default (io)=>{
     
     });
 
+   var  searchOrCreateNotifyMeByUserID = async function  (userID) {
+    if(userID == null){
+      return null
+    }
+      const user = await notifyMeOrdersCollection.findOne({ userID });
+      if (!user) {
+        const newUser = {
+          userID,
+          notyfyMe: true
+        };
+        await notifyMeOrdersCollection.insertOne(newUser);
+        return await notifyMeOrdersCollection.findOne({ userID });
+      }
+      return user;
+    }
+
    var getCurrentData = async (data = {page: 1, perPage: 10, professionIds: null})=>{
 
       try {
@@ -88,7 +124,7 @@ export default (io)=>{
   
         console.log(data.professionIds)
   
-       let resp = await ServicesCollection.find({ deleted_at: { $exists: false }, profession_id: { $in: data.professionIds } }).sort({ created_at: -1 }).skip(skip).limit(limit).toArray();
+       let resp = await ServicesCollection.find({ deleted_at: { $exists: false }, profession_id: { $in: data.professionIds }, technical_id:{$ne: null}}).sort({ created_at: -1 }).skip(skip).limit(limit).toArray();
        return resp
       } catch (error) {
         console.log(error)
