@@ -22,14 +22,23 @@ export default (io)=>{
 
         changeStream.on('change', async (change) => {
 
+          console.log("change")
+
           try {
+            
             if (change.operationType === 'insert' || change.operationType === 'update' ) {
             
               let service = await ServicesCollection.findOne({ _id:change.documentKey._id||"" })
-              let profesion = await professionsCollection.findOne({_id: new ObjectID(service.profession_id)})
-              console.log(profesion.slug_name);
-  
-              io.emit(`server:refresh:${profesion.slug_name}`, true); 
+
+              if(service.deleted_at == null){
+                  let profesion = await professionsCollection.findOne({_id: new ObjectID(service.profession_id)})
+                  console.log(profesion.slug_name);
+      
+                  io.emit(`server:refresh:${profesion.slug_name}`, true); 
+              }else{
+                console.log('eliminado')
+              }
+            
               
             }
           } catch (error) {
