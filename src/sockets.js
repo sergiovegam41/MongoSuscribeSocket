@@ -131,7 +131,7 @@ export default (io)=>{
   
         console.log(data.professionIds)
   
-       let resp = await ServicesCollection.find({ deleted_at: { $exists: false }, profession_id: { $in: data.professionIds }, technical_id:{$ne: null}}).sort({ created_at: -1 }).skip(skip).limit(limit).toArray();
+       let resp = await ServicesCollection.find({ deleted_at: { $exists: false }, profession_id: { $in: data.professionIds },  status: "CREATED", is_public: true}).sort({ created_at: -1 }).skip(skip).limit(limit).toArray();
        return resp
       } catch (error) {
         console.log(error)
