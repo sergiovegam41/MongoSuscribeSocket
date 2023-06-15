@@ -326,7 +326,7 @@ export default (io,app)=>{
         return await briefcasesCollection.findOne({ technical_id });
       }
 
-      return await technicalStarsCollection.findOne({ technical_id });
+      return await briefcasesCollection.findOne({ technical_id });
 
     }
 
