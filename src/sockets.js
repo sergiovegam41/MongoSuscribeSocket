@@ -83,7 +83,7 @@ export default (io,app)=>{
             // console.log(data)
             let resp = await getCurrentData(data['paginate']);
             let notifyMe = await searchOrCreateNotifyMeByUserID(data['userID'])
-            let starts =  await searchStartsByUserID(id)
+            let starts =  await searchStartsByUserID(data['userID'])
             // console.log(notifyMe)
 
         
