@@ -9,6 +9,9 @@ import { PORT } from './config.js';
     // await connectDB()
     
     const server = http.createServer(app)
+
+   
+    
     const httpServer = server.listen(PORT,'0.0.0.0',()=>{
         
         console.log("Server runing in port "+PORT)
@@ -16,7 +19,7 @@ import { PORT } from './config.js';
             cors: {
             origin:"*"
         }})
-        sockets(io)
+        sockets(io,app)
 
     })
 
