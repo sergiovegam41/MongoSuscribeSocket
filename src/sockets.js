@@ -13,6 +13,7 @@ export default (io,app)=>{
     var ConfigCollection = null
     var technicalStarsServicesDetailCollection = null
     var technicalStarsCollection = null
+    var briefcasesCollection = null
 
     Mongoclient.connect(async err => {
       
@@ -24,6 +25,7 @@ export default (io,app)=>{
         ConfigCollection = Mongoclient.db(DATABASE).collection("Config");
         technicalStarsServicesDetailCollection = Mongoclient.db(DATABASE).collection("technical_stars_services_detail");
         technicalStarsCollection = Mongoclient.db(DATABASE).collection("technical_stars");
+        briefcasesCollection = Mongoclient.db(DATABASE).collection("briefcases");
   
         const changeStream = ServicesCollection.watch();
 
@@ -84,11 +86,12 @@ export default (io,app)=>{
             let resp = await getCurrentData(data['paginate']);
             let notifyMe = await searchOrCreateNotifyMeByUserID(data['userID'])
             let starts =  await searchStartsByUserID(data['userID'])
+            let briefcase =  await searchBriefcasesrsByUserID(data['userID'])
             // console.log(notifyMe)
 
         
               
-              socket.emit('server:setData', {orders: resp, notifiMeOrders: notifyMe.notyfyMe, starts: starts })
+              socket.emit('server:setData', {orders: resp, notifiMeOrders: notifyMe.notyfyMe, starts: starts,briefcase:briefcase })
             
             
           })
@@ -303,6 +306,24 @@ export default (io,app)=>{
         };
         await technicalStarsCollection.insertOne(newUser);
         return await technicalStarsCollection.findOne({ technical_id });
+      }
+
+      return await technicalStarsCollection.findOne({ technical_id });
+
+    }
+
+    async function searchBriefcasesrsByUserID( technical_id ) {
+
+
+      const item = await briefcasesCollection.findOne({ technical_id });
+
+      if (!item) {
+        const newBriefcase = {
+          technical_id,
+          current_amount: 0
+        };
+        await briefcasesCollection.insertOne(newBriefcase);
+        return await briefcasesCollection.findOne({ technical_id });
       }
 
       return await technicalStarsCollection.findOne({ technical_id });
