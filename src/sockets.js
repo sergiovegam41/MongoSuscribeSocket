@@ -5,7 +5,6 @@ const DATABASE = MONGODB_NAME
 
 export default (io,app)=>{
 
-
     const Mongoclient = new MongoClient(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
     var ServicesCollection = null
     var professionsCollection = null
@@ -14,6 +13,10 @@ export default (io,app)=>{
     var technicalStarsServicesDetailCollection = null
     var technicalStarsCollection = null
     var briefcasesCollection = null
+    var countriesCollection = null
+    var departmentsCollection = null
+    var municipalitiesCollection = null
+    var technical_workplaceCollection = null
 
     Mongoclient.connect(async err => {
       
@@ -26,6 +29,11 @@ export default (io,app)=>{
         technicalStarsServicesDetailCollection = Mongoclient.db(DATABASE).collection("technical_stars_services_detail");
         technicalStarsCollection = Mongoclient.db(DATABASE).collection("technical_stars");
         briefcasesCollection = Mongoclient.db(DATABASE).collection("briefcases");
+
+        countriesCollection = Mongoclient.db(DATABASE).collection("countries");
+        departmentsCollection = Mongoclient.db(DATABASE).collection("departments");
+        municipalitiesCollection = Mongoclient.db(DATABASE).collection("municipalities");
+        technical_workplaceCollection = Mongoclient.db(DATABASE).collection("technical_workplace");
   
         const changeStream = ServicesCollection.watch();
 
@@ -83,15 +91,14 @@ export default (io,app)=>{
           socket.on("client:getData", async (data = {paginate: {page: 1, perPage: 10, professionIds: null},userID: null})=>{
 
             // console.log(data)
-            let resp = await getCurrentData(data['paginate']);
+            let technical_workplace =  await searchOrTechnicalWorkplaceUserID(data['userID'])
+            let resp = await getCurrentData(data['paginate'], technical_workplace.municipality_id);
             let notifyMe = await searchOrCreateNotifyMeByUserID(data['userID'])
             let starts =  await searchStartsByUserID(data['userID'])
             let briefcase =  await searchBriefcasesrsByUserID(data['userID'])
-            // console.log(notifyMe)
-
-        
-              
-              socket.emit('server:setData', {orders: resp, notifiMeOrders: notifyMe.notyfyMe, starts: starts,briefcase:briefcase })
+            console.log(technical_workplace)
+            
+            socket.emit('server:setData', {orders: resp, notifiMeOrders: notifyMe.notyfyMe, starts: starts,briefcase:briefcase, technical_workplace})
             
             
           })
@@ -115,11 +122,52 @@ export default (io,app)=>{
         //     data: await searchStartsByUserID(id)
         //   })
 
+        app.get('/getCountries',  async function(req, res) {
 
+          let countries = await countriesCollection.find({}).toArray()
 
-        // })
+          return res.send({
+
+            success:true,
+            message: "OK",
+            data: countries
+          })
         
-        app.post('/rate-service', async function(req, res) {
+        })
+
+
+        app.get('/getDepartamentsByCountriID/:id',  async function(req, res) {
+
+          var id = req.params.id;
+          let departaments = await departmentsCollection.find({countri_id:id}).toArray()
+
+          return res.send({
+
+            success:true,
+            message: "OK",
+            data: departaments
+          })
+        
+        })
+
+
+        app.get('/getMunicipalysByDepartamentID/:id',  async function(req, res) {
+
+          var id = req.params.id;
+          let municipalities = await municipalitiesCollection.find({departament_id:id}).toArray()
+
+          return res.send({
+
+            success:true,
+            message: "OK",
+            data: municipalities
+          })
+        
+        })
+        
+      
+        
+        app.post('/rate-service', async function(req, res) {  
 
           // console.log("bot-list")
           
@@ -207,9 +255,37 @@ export default (io,app)=>{
       return user;
     }
 
-   var getCurrentData = async (data = {page: 1, perPage: 10, professionIds: null})=>{
+    var  searchOrTechnicalWorkplaceUserID = async function  (userID) {
+    if(userID == null){
+      return null
+    }
+      const user = await technical_workplaceCollection.findOne({ user_id:userID });
+      if (!user) {
+        const newUser = {
+          user_id: userID,
+          countri_id:null,
+          departament_id:null,
+          municipality_id:null
+        };
+        await technical_workplaceCollection.insertOne(newUser);
+        return await technical_workplaceCollection.findOne({ user_id:userID });
+      }
+
+      if(user.countri_id && user.municipality_id ){
+        let coountri = await countriesCollection.findOne({_id: new ObjectID(user.countri_id)})
+        let municipaly = await municipalitiesCollection.findOne({_id: new ObjectID(user.municipality_id  )})
+  
+        return { countrIcon: coountri.icon, municipalyName: municipaly.name, ...user};
+      }
+
+      return user
+     
+    }
+
+   var getCurrentData = async (data = {page: 1, perPage: 10, professionIds: null}, municipaly_id)=>{
 
       try {
+
         const page = data.page; 
         const perPage = data.perPage; 
         const skip = (page - 1) * perPage; 
@@ -220,9 +296,9 @@ export default (io,app)=>{
           ]
         }
   
-        console.log(data.professionIds)
+        // console.log(data.professionIds)
   
-       let resp = await ServicesCollection.find({ deleted_at: { $exists: false }, profession_id: { $in: data.professionIds },  status: "CREATED", is_public: true}).sort({ created_at: -1 }).skip(skip).limit(limit).toArray();
+       let resp = await ServicesCollection.find({municipality_id:municipaly_id, deleted_at: { $exists: false }, profession_id: { $in: data.professionIds },  status: "CREATED", is_public: true}).sort({ created_at: -1 }).skip(skip).limit(limit).toArray();
        return resp
       } catch (error) {
         console.log(error)
