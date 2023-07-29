@@ -1,14 +1,44 @@
-import {  connect } from 'mongoose';
+// import {  connect } from 'mongoose';
 import { MONGODB_URI } from './config.js'
-export const connectDB = async ()=>{
+import { MongoClient, ServerApiVersion } from 'mongodb';
+
+
+export class DBNames {
+
+    static services = "services";
+    static professions = "professions";
+    static notifyMeOrders = "notifyMeOrders";
+    static Config = "Config";
+    static technical_stars_services_detail = "technical_stars_services_detail";
+    static technical_stars = "technical_stars";
+    static briefcases = "briefcases";
+    static countries = "countries";
+    static departments = "departments";
+    static municipalities = "municipalities";
+    static technical_workplace = "technical_workplace";
+
+} 
+
+export const connectDB = async ( onConnect ) => {
+
+
     try {
 
-     await connect(MONGODB_URI)
-     console.log("Conectado a mongo")
+        const Mongoclient = new MongoClient(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+
+        return Mongoclient.connect(async err => {
+           
+            if(onConnect){
+                onConnect(Mongoclient)
+            }
+            
+        })
+        
         
     } catch (error) {
 
         console.log(error)
         
     }
+
 }
