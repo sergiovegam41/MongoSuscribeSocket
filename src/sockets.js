@@ -114,8 +114,8 @@ export default (io,MongoClient) => {
 
       if(user.countri_id && user.municipality_id ){
 
-        let coountri = await MongoClient.db(MONGODB_NAME).collection(DBNames.countries).findOne({_id: new ObjectID(user.countri_id)})
-        let municipaly =await MongoClient.db(MONGODB_NAME).collection(DBNames.municipalities).findOne({_id: new ObjectID(user.municipality_id  )})
+        let coountri = await MongoClient.collection(DBNames.countries).findOne({_id: new ObjectID(user.countri_id)})
+        let municipaly =await MongoClient.collection(DBNames.municipalities).findOne({_id: new ObjectID(user.municipality_id  )})
   
         return { countrIcon: coountri.icon, municipalyName: municipaly.name, ...user };
       }
