@@ -18,7 +18,7 @@ export default (io,MongoClient) => {
           let service = await MongoClient.collection(DBNames.services).findOne({ _id:change.documentKey._id||"" })
          
           let profesion = await MongoClient.collection(DBNames.professions).findOne({_id: new ObjectID(service.profession_id)})
-          console.log(profesion.slug_name);
+          // console.log(profesion.slug_name);
 
           io.emit(`server:refresh:${profesion.slug_name}`, true); 
           
@@ -31,13 +31,12 @@ export default (io,MongoClient) => {
 
     });
 
-
-    io.on('connection', async (socket)=>{
+    io.on('connection', async (socket) => {
 
       console.log("New conecction")
 
       let resp = await getCurrentData();
-      console.log(resp)
+      // console.log(resp)
 
       socket.emit('server:init', true)
 
@@ -54,14 +53,15 @@ export default (io,MongoClient) => {
 
       })
 
-      socket.on("client:getData", async (data = {paginate: {page: 1, perPage: 10, professionIds: null},userID: null})=>{
+      socket.on("client:getData", async (data = {paginate: {page: 1, perPage: 10, professionIds: null},userID: null,firebase_token:null})=>{
 
-        let technical_workplace =  await searchOrTechnicalWorkplaceUserID(data['userID'])
+        let technical_workplace = await searchOrTechnicalWorkplaceUserID(data['userID'])
         let resp = await getCurrentData(data['paginate'], technical_workplace.municipality_id);
-        let notifyMe = await searchOrCreateNotifyMeByUserID(data['userID'])
-        let starts =  await searchStartsByUserID(data['userID'])
-        let briefcase =  await searchBriefcasesrsByUserID(data['userID'])
-        console.log(technical_workplace)
+        let notifyMe = await searchOrCreateNotifyMeByUserID(data['userID'],data.firebase_token)
+        let starts = await searchStartsByUserID(data['userID'])
+        let briefcase = await searchBriefcasesrsByUserID(data['userID'])
+
+        // console.log(technical_workplace)
         
         socket.emit('server:setData', {orders: resp, notifiMeOrders: notifyMe.notyfyMe, starts: starts,briefcase:briefcase, technical_workplace})
         
@@ -77,77 +77,84 @@ export default (io,MongoClient) => {
 
 
 
-   var  searchOrCreateNotifyMeByUserID = async function  (userID) {
-    if(userID == null){
-      return null
-    }
-      const user = await MongoClient.collection(DBNames.notifyMeOrders).findOne({ userID });
-      if (!user) {
-        const newUser = {
-          userID,
-          notyfyMe: true
-        };
-        await MongoClient.collection(DBNames.notifyMeOrders).insertOne(newUser);
-        return await MongoClient.collection(DBNames.notifyMeOrders).findOne({ userID });
-      }
-      return user;
-    }
-
-    var  searchOrTechnicalWorkplaceUserID = async function  (userID) {
+   var  searchOrCreateNotifyMeByUserID = async function  (userID,firebase_token=null) {
       
       if(userID == null){
         return null
       }
 
-      const user = await MongoClient.collection(DBNames.technical_workplace).findOne({ user_id:userID });
-
+      const user = await MongoClient.collection(DBNames.notifyMeOrders).findOne({ userID });
       if (!user) {
         const newUser = {
-          user_id: userID,
-          countri_id:null,
-          departament_id:null,
-          municipality_id:null
+          userID,
+          notyfyMe: true,
+          firebase_token
         };
-        await MongoClient.collection(DBNames.technical_workplace).insertOne(newUser);
-        return await MongoClient.collection(DBNames.technical_workplace).findOne({ user_id:userID });
-      }
-
-      if(user.countri_id && user.municipality_id ){
-
-        let coountri = await MongoClient.collection(DBNames.countries).findOne({_id: new ObjectID(user.countri_id)})
-        let municipaly =await MongoClient.collection(DBNames.municipalities).findOne({_id: new ObjectID(user.municipality_id  )})
-  
-        return { countrIcon: coountri.icon, municipalyName: municipaly.name, ...user };
-      }
-
-      return user
-    
-    }
-
-   var getCurrentData = async (data = {page: 1, perPage: 10, professionIds: null}, municipaly_id)=>{
-
-      try {
-
-        const page = data.page; 
-        const perPage = data.perPage; 
-        const skip = (page - 1) * perPage; 
-        const limit = perPage;
-        if(data.professionIds == null){
-          data.professionIds = [
-            "64582a4580fcfe55480ea7c2"
-          ]
+        await MongoClient.collection(DBNames.notifyMeOrders).insertOne(newUser);
+      }else{
+        if(firebase_token){
+          await MongoClient.collection(DBNames.notifyMeOrders).updateOne({ _id: user._id }, { $set: { firebase_token } });
         }
-  
-        // console.log(data.professionIds)
-  
-       let resp = await MongoClient.collection(DBNames.services).find({municipality_id:municipaly_id, deleted_at: { $exists: false }, profession_id: { $in: data.professionIds },  status: "CREATED", is_public: true}).sort({ created_at: -1 }).skip(skip).limit(limit).toArray();
-       return resp
-      } catch (error) {
-        console.log(error)
       }
-      
 
+      return await MongoClient.collection(DBNames.notifyMeOrders).findOne({ userID });
     }
+
+  var  searchOrTechnicalWorkplaceUserID = async function  (userID) {
+    
+    if(userID == null){
+      return null
+    }
+
+    const user = await MongoClient.collection(DBNames.technical_workplace).findOne({ user_id:userID });
+
+    if (!user) {
+      const newUser = {
+        user_id: userID,
+        countri_id:null,
+        departament_id:null,
+        municipality_id:null
+      };
+      await MongoClient.collection(DBNames.technical_workplace).insertOne(newUser);
+      return await MongoClient.collection(DBNames.technical_workplace).findOne({ user_id:userID });
+    }
+
+    if(user.countri_id && user.municipality_id ){
+
+      let coountri = await MongoClient.collection(DBNames.countries).findOne({_id: new ObjectID(user.countri_id)})
+      let municipaly =await MongoClient.collection(DBNames.municipalities).findOne({_id: new ObjectID(user.municipality_id  )})
+
+      return { countrIcon: coountri.icon, municipalyName: municipaly.name, ...user };
+    }
+
+    return user
+  
+  }
+
+  var getCurrentData = async (data = {page: 1, perPage: 10, professionIds: null}, municipaly_id)=>{
+
+    try {
+
+      const page = data.page; 
+      const perPage = data.perPage; 
+      const skip = (page - 1) * perPage; 
+      const limit = perPage;
+      if(data.professionIds == null){
+        data.professionIds = [
+          "64582a4580fcfe55480ea7c2"
+        ]
+      }
+
+      // console.log(data.professionIds)
+
+      let resp = await MongoClient.collection(DBNames.services).find({municipality_id:municipaly_id, deleted_at: { $exists: false }, profession_id: { $in: data.professionIds },  status: "CREATED", is_public: true}).sort({ created_at: -1 }).skip(skip).limit(limit).toArray();
+      return resp
+    } catch (error) {
+      console.log(error)
+    }
+    
+
+  }
 
     
 

@@ -1,5 +1,6 @@
 import LocationController from './Controllers/LocationController.js';
 import StartsController from './Controllers/StartsController.js';
+import CronJobs from './Jobs/CronJobs.js';
 import moment from "moment";
 import cron from 'node-cron';
 
@@ -9,6 +10,7 @@ export default (app, MongoClient) => {
   app.get('/getCountries',  async (req, res) => LocationController.getCountries(MongoClient,req,res))
   app.get('/getDepartamentsByCountriID/:id',  async (req, res) => LocationController.getDepartamentsByCountrieID(MongoClient,req,res))
   app.get('/getMunicipalysByDepartamentID/:id',  async (req, res) => LocationController.getCitiesByEtateID(MongoClient,req,res))
+  
   app.get('/ping', async function (req, res) {
     return res.send(true)
   })
@@ -22,21 +24,16 @@ export default (app, MongoClient) => {
       formattedTime = 0;
     }
 
-    UTCRangeTimeInvert[i] = formattedTime;
+    UTCRangeTimeInvert[i] = {formattedTime,utc_hour:i};
     formattedTime++;
 
   }
 
-
-  console.log(UTCRangeTimeInvert)
-
   UTCRangeTimeInvert.forEach(function(valor, clave) {
     
-    cron.schedule(`0 ${valor} * * *`, () => {
-      
-      console.log( "Cron" )
-      console.log( moment().format('H') )
-      console.log(clave + ' = ' + valor);
+    cron.schedule(`0 ${valor.formattedTime} * * *`, () => {
+
+      CronJobs.run(MongoClient,valor.utc_hour)
 
     });
   });
