@@ -63,12 +63,10 @@ class NotificationsController {
         let millisegundos =  ((parseInt(scheduled_notifications.delay??"0") * 60)) * 1000 ;
         console.log(millisegundos);
 
-        setTimeout( async () => {
-
-          console.log("Delay !",scheduled_notifications.delay);
+        if(millisegundos==0){
 
             await notifyMeOrders.forEach(async element => {
-
+      
                 if(element.notyfyMe && element.firebase_token){
     
                     const professions_technical_details = await MongoClient.collection(DBNames.professions_technical_details).find({ technical_id: element.userID, profession_id: { $in: scheduled_notifications.profession_filter } }).toArray();
@@ -83,8 +81,33 @@ class NotificationsController {
                 }
     
             });
+            
+        }else{
+            setTimeout( async () => {
 
-        }, millisegundos );
+                console.log("Delay !",scheduled_notifications.delay);
+      
+                  await notifyMeOrders.forEach(async element => {
+      
+                      if(element.notyfyMe && element.firebase_token){
+          
+                          const professions_technical_details = await MongoClient.collection(DBNames.professions_technical_details).find({ technical_id: element.userID, profession_id: { $in: scheduled_notifications.profession_filter } }).toArray();
+          
+                          
+                          if(professions_technical_details.length > 0){
+              
+                              await this.sendNotify( FIREBASE_TOKEN, element.firebase_token, title, body, tipo  )                
+          
+                          }
+          
+                      }
+          
+                  });
+      
+              }, millisegundos );
+        }
+
+        
 
       
     }
