@@ -83,10 +83,10 @@ export default (io,MongoClient) => {
         return null
       }
 
-      const user = await MongoClient.collection(DBNames.notifyMeOrders).findOne({ userID });
+      const user = await MongoClient.collection(DBNames.notifyMeOrders).findOne({ userID: parseInt(userID) });
       if (!user) {
         const newUser = {
-          userID,
+          userID: parseInt(userID),
           notyfyMe: true,
           firebase_token
         };
@@ -97,7 +97,7 @@ export default (io,MongoClient) => {
         }
       }
 
-      return await MongoClient.collection(DBNames.notifyMeOrders).findOne({ userID });
+      return await MongoClient.collection(DBNames.notifyMeOrders).findOne({ userID: parseInt(userID) });
     }
 
   var  searchOrTechnicalWorkplaceUserID = async function  (userID) {
