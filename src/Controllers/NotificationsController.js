@@ -6,6 +6,25 @@ import ReplaceableWordsController from '../Utils/ReplaceableWordsController.js';
 
 class NotificationsController {
 
+
+    static async sendNotifyMany(MongoClient,req,res){
+        res.send({
+            success: true,
+            message: "OK",
+    
+        })
+
+    //    setTimeout(async () => {
+        // console.log("Hola!!!")
+        await  this.sendNotifyManyByFilter(MongoClient, req.body.title, req.body.body,'comun', { profession_filter: req.body.profession_filter, delay: 0 })
+
+    //    },2000)
+
+      
+
+
+    }
+
     static async sendNotifyManyByFilter(MongoClient, title, body, tipo = "comun", scheduled_notifications) {
 
         console.log('sendNotifyManyByFilter')
@@ -62,19 +81,22 @@ class NotificationsController {
 
             await notifyMeOrders.forEach(async element => {
 
-                console.log(element)
+                // console.log(element)
 
                 let currentUser = await MongoClient.collection(DBNames.UserCopy).findOne({ id: parseInt(element.userID) });
 
+                // console.log(currentUser)
+                console.log("userID: ",element.userID)
 
                 if (element.notyfyMe && element.firebase_token && currentUser) {
 
                     if (scheduled_notifications.profession_filter?.length > 0) {
-                        const professions_technical_details = await MongoClient.collection(DBNames.professions_technical_details).find({ technical_id: element.userID, profession_id: { $in: scheduled_notifications.profession_filter } }).toArray();
+                        const professions_technical_details = await MongoClient.collection(DBNames.professions_technical_details).find({ technical_id: element.userID.toString(), profession_id: { $in: scheduled_notifications.profession_filter } }).toArray();
+                       
                         if (professions_technical_details.length > 0) {
                             await this.sendNotify(FIREBASE_TOKEN, element.firebase_token, ReplaceableWordsController.replaceByUser(title, currentUser, dayOfWeek), ReplaceableWordsController.replaceByUser(body, currentUser, dayOfWeek), tipo)
                         } else {
-                            console.log("BAD 2")
+                            console.log("no pertenece")
                         }
                     } else {
 
@@ -84,7 +106,7 @@ class NotificationsController {
 
                 } else {
 
-                    console.log("BAD")
+                    console.log("usuario no encontrado")
 
                 }
             });

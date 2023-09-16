@@ -9,7 +9,7 @@ export default (io,MongoClient) => {
 
     changeStream.on('change', async (change) => {
 
-      console.log("change")
+      // console.log("change")
 
       try {
 
@@ -42,9 +42,11 @@ export default (io,MongoClient) => {
 
       socket.on("client:setNotifyMeOrders", async (data = {"notifi":notifi??true,"userID":null})=>{
 
+        console.log(data)
+
         let notifyMe = await searchOrCreateNotifyMeByUserID(data['userID'])
         if(notifyMe){
-          const user = await MongoClient.collection(DBNames.notifyMeOrders).updateOne({ userID: data['userID'] },{ $set: {  notyfyMe: data['notifi'] } });
+          await MongoClient.collection(DBNames.notifyMeOrders).updateOne({ userID: parseInt(data['userID']) },{ $set: {  notyfyMe: data['notifi'] } });
           let notifyMe = await searchOrCreateNotifyMeByUserID(data['userID'])
 
           socket.emit('server:setNotifyMeOrders', notifyMe.notyfyMe)

@@ -28,15 +28,19 @@ class ReplaceableWordsController {
 
 
     static replaceByUser(msj,user,dayOfWeek = 0,hour=moment().format("HH:mm:ss")){
-
-        return msj.replaceAll(this.user_name, user.name)
-        .replaceAll(this.user_last_name, user.last_name)
-        .replaceAll(this.user_number_document, user.document)
-        .replaceAll(this.user_email, user.email)
-        .replaceAll(this.user_country_code, user.country_code)
-        .replaceAll(this.user_phone, user.phone)
-        .replaceAll(this.user_birthday,moment(user.birthday).format("d MMMM") )
-        .replaceAll(this.dayWeekName,this.dayNamesColeb[dayOfWeek] )
+        if(msj){
+            return msj.replaceAll(this.user_name, user.name)
+            ?.replaceAll(this.user_last_name, user.last_name)
+            ?.replaceAll(this.user_number_document, user.document)
+            ?.replaceAll(this.user_email, user.email)
+            ?.replaceAll(this.user_country_code, user.country_code)
+            ?.replaceAll(this.user_phone, user.phone)
+            ?.replaceAll(this.user_birthday,moment(user.birthday).format("d MMMM") )
+            ?.replaceAll(this.dayWeekName,this.dayNamesColeb[dayOfWeek] )
+        }else{
+            return ""
+        }
+     
       
     }
 

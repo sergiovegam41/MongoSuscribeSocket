@@ -53,13 +53,6 @@ class ProfessionsController {
 
       var id = req.params.id;
 
-      // await MongoClient.collection(DBNames.technical_stars).updateOne({ technical_id }, {
-      //   $set: {
-      //     technical_id,
-      //     value
-      //   }
-      // });
-
       await MongoClient.collection(DBNames.scheduled_notifications).updateOne({ _id: ObjectId(id) },
         {
           $set: {
@@ -73,7 +66,8 @@ class ProfessionsController {
             country_id: req.body.country_id,
             date: req.body.date.replaceAll('-', '/'),
           }
-        });
+        }
+      );
 
       return res.send({
         success: true,
