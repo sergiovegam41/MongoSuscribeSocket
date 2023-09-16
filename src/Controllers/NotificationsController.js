@@ -16,7 +16,7 @@ class NotificationsController {
 
     //    setTimeout(async () => {
         // console.log("Hola!!!")
-        await  this.sendNotifyManyByFilter(MongoClient, req.body.title, req.body.body,'comun', { profession_filter: req.body.profession_filter, delay: 0 })
+        await  this.sendNotifyManyByFilter(MongoClient, req.body.title, req.body.body,req.body.type, { profession_filter: req.body.profession_filter, delay: 0 })
 
     //    },2000)
 
