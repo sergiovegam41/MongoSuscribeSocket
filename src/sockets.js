@@ -1,5 +1,5 @@
 import { MONGODB_URI, MONGODB_NAME } from './config.js'
-import { ServerApiVersion, ObjectID } from 'mongodb';
+import { ServerApiVersion, ObjectId } from 'mongodb';
 import { DBNames } from './db.js';
 
 
@@ -17,7 +17,7 @@ export default (io,MongoClient) => {
         
           let service = await MongoClient.collection(DBNames.services).findOne({ _id:change.documentKey._id||"" })
          
-          let profesion = await MongoClient.collection(DBNames.professions).findOne({_id: new ObjectID(service.profession_id)})
+          let profesion = await MongoClient.collection(DBNames.professions).findOne({_id: new ObjectId(service.profession_id)})
           // console.log(profesion.slug_name);
 
           io.emit(`server:refresh:${profesion.slug_name}`, true); 
@@ -123,10 +123,10 @@ export default (io,MongoClient) => {
 
     if(user.countri_id && user.municipality_id ){
 
-      let coountri = await MongoClient.collection(DBNames.countries).findOne({_id: new ObjectID(user.countri_id)})
-      let municipaly =await MongoClient.collection(DBNames.municipalities).findOne({_id: new ObjectID(user.municipality_id  )})
+      let coountri = await MongoClient.collection(DBNames.countries).findOne({_id: new ObjectId(user.countri_id)})
+      let municipaly =await MongoClient.collection(DBNames.municipalities).findOne({_id: new ObjectId(user.municipality_id  )})
 
-      return { countrIcon: coountri.icon, municipalyName: municipaly.name, ...user };
+      return { countrIcon: coountri.icon, countriName: coountri.name??"", municipalyName: municipaly.name, ...user };
     }
 
     return user
