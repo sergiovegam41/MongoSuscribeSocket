@@ -16,7 +16,11 @@ export class DBNames {
     static departments = "departments";
     static municipalities = "municipalities";
     static technical_workplace = "technical_workplace";
-
+    static scheduled_notifications = "scheduled_notifications";
+    static professions_technical_details = "professions_technical_details";
+    static UserCopy = "UserCopy";
+    static sessionTokens = "session_tokens";
+    
 } 
 
 export const connectDB = async ( onConnect ) => {

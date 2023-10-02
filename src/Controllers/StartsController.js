@@ -27,7 +27,7 @@ class StartsController {
         message: "value IS REQUIRED",
       })
 
-      const service =  await MongoClient.collection(DBNames.services).findOne({_id: ObjectID(service_id)});
+      const service =  await MongoClient.collection(DBNames.services).findOne({_id: ObjectId(service_id)});
 
       if(service){
 
