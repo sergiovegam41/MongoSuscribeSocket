@@ -35,7 +35,7 @@ class ReplaceableWordsController {
             ?.replaceAll(this.user_email, user.email)
             ?.replaceAll(this.user_country_code, user.country_code)
             ?.replaceAll(this.user_phone, user.phone)
-            ?.replaceAll(this.user_birthday,moment(user.birthday).format("d MMMM") )
+            ?.replaceAll(this.user_birthday,moment(user.birthday)?.format("d MMMM")??"" )
             ?.replaceAll(this.dayWeekName,this.dayNamesColeb[dayOfWeek] )
         }else{
             return ""
