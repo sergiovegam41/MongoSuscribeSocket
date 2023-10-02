@@ -4,6 +4,8 @@ import moment from "moment";
 import ReplaceableWordsController from '../Utils/ReplaceableWordsController.js';
 
 
+
+
 class NotificationsController {
 
 
@@ -14,14 +16,7 @@ class NotificationsController {
     
         })
 
-    //    setTimeout(async () => {
-        // console.log("Hola!!!")
         await  this.sendNotifyManyByFilter(MongoClient, req.body.title, req.body.body,req.body.type, { profession_filter: req.body.profession_filter, delay: 0 })
-
-    //    },2000)
-
-      
-
 
     }
 
@@ -70,7 +65,7 @@ class NotificationsController {
 
         console.log(dayOfWeek)
         console.log("notify")
-
+ 
         let notifyMeOrders = await MongoClient.collection(DBNames.notifyMeOrders).find({ notyfyMe: true }).toArray()
 
         let millisegundos = ((parseInt(scheduled_notifications.delay || "0") * 60)) * 1000;
@@ -81,8 +76,6 @@ class NotificationsController {
 
             await notifyMeOrders.forEach(async element => {
 
-                // console.log(element)
-
                 let currentUser = await MongoClient.collection(DBNames.UserCopy).findOne({ id: parseInt(element.userID) });
 
                 // console.log(currentUser)
@@ -91,6 +84,7 @@ class NotificationsController {
                 if (element.notyfyMe && element.firebase_token && currentUser) {
 
                     if (scheduled_notifications.profession_filter?.length > 0) {
+                        
                         const professions_technical_details = await MongoClient.collection(DBNames.professions_technical_details).find({ technical_id: element.userID.toString(), profession_id: { $in: scheduled_notifications.profession_filter } }).toArray();
                        
                         if (professions_technical_details.length > 0) {
