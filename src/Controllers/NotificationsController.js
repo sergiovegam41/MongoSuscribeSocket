@@ -26,6 +26,8 @@ class NotificationsController {
 
         const FIREBASE_TOKEN = (await MongoClient.collection(DBNames.Config).findOne({ name: "FIREBASE_TOKEN" })).value;
 
+        console.log(FIREBASE_TOKEN)
+
         const now = moment();
         const dayOfWeek = now.day();
         const formattedDate = now.format("MM/DD/YYYY");
@@ -47,6 +49,10 @@ class NotificationsController {
             }
 
         } else {
+
+            console.log("unico")
+            console.log(scheduled_notifications.date)
+            console.log(formattedDate)
 
 
             if (scheduled_notifications.date == formattedDate) {
