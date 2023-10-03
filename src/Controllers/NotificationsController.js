@@ -30,9 +30,11 @@ class NotificationsController {
 
         const now = moment();
         const dayOfWeek = now.day();
-        const formattedDate = now.format("MM/DD/YYYY");
+        const formattedDate = now.format("YYYY/MM/DD");
 
         if (!scheduled_notifications.unique) {
+
+            console.log("!unico")
 
             if (scheduled_notifications.dayOfWeek) {
 
@@ -54,9 +56,8 @@ class NotificationsController {
             console.log(scheduled_notifications.date)
             console.log(formattedDate)
 
-
             if (scheduled_notifications.date == formattedDate) {
-
+                
                 await this.notifyAll(MongoClient, scheduled_notifications, FIREBASE_TOKEN, title, body, tipo, dayOfWeek)
                 await MongoClient.collection(DBNames.scheduled_notifications).deleteOne({ _id: scheduled_notifications._id })
 
