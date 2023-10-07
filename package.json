@@ -19,7 +19,9 @@
     "mongodb": "^4.11.0",
     "mongoose": "^7.1.0",
     "node-cron": "^3.0.2",
-    "socket.io": "^4.6.1"
+    "run": "^1.4.0",
+    "socket.io": "^4.6.1",
+    "start": "^5.1.0"
   },
   "type": "module",
   "devDependencies": {
