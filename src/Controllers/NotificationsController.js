@@ -24,7 +24,10 @@ class NotificationsController {
 
     static async sendNotifyManyByFilter(MongoClient, title, body, tipo = "comun", scheduled_notifications) {
 
-        console.log('sendNotifyManyByFilter')
+        
+
+        console.log('###NOTIFY MANYYY###')
+        console.log(scheduled_notifications)
 
         const FIREBASE_TOKEN = (await MongoClient.collection(DBNames.Config).findOne({ name: "FIREBASE_TOKEN" })).value;
 
@@ -101,6 +104,7 @@ class NotificationsController {
                         
                         const professions_technical_details = await MongoClient.collection(DBNames.professions_technical_details).find({ technical_id: element.userID.toString(), profession_id: { $in: scheduled_notifications.profession_filter } }).toArray();
                         
+                        console.log(professions_technical_details)
                         if (professions_technical_details.length > 0) {
                             console.log("professions_technical_details")
                             await this.sendNotify(FIREBASE_TOKEN, element.firebase_token, ReplaceableWordsController.replaceByUser(title, currentUser, dayOfWeek), ReplaceableWordsController.replaceByUser(body, currentUser, dayOfWeek), tipo)
