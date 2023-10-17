@@ -16,7 +16,9 @@ class NotificationsController {
     
         })
 
-        await  this.sendNotifyManyByFilter(MongoClient, req.body.title, req.body.body,req.body.type, { profession_filter: req.body.profession_filter, delay: 0 })
+        console.log("sendNotifyMany")
+
+        await  this.sendNotifyManyByFilter(MongoClient, req.body.title, req.body.body,req.body.type, { profession_filter: req.body.profession_filter, delay: 0, unique: false, dayOfWeek:false })
 
     }
 
@@ -83,16 +85,24 @@ class NotificationsController {
 
                 if (element.notyfyMe && element.firebase_token && currentUser) {
 
+                    console.log("notificarme, firebase y usuario")
+
                     if (scheduled_notifications.profession_filter?.length > 0) {
+
+                        
+                        console.log("con filtro de profesion")
                         
                         const professions_technical_details = await MongoClient.collection(DBNames.professions_technical_details).find({ technical_id: element.userID.toString(), profession_id: { $in: scheduled_notifications.profession_filter } }).toArray();
-                       
+                        
                         if (professions_technical_details.length > 0) {
+                            console.log("professions_technical_details")
                             await this.sendNotify(FIREBASE_TOKEN, element.firebase_token, ReplaceableWordsController.replaceByUser(title, currentUser, dayOfWeek), ReplaceableWordsController.replaceByUser(body, currentUser, dayOfWeek), tipo)
                         } else {
                             console.log("no pertenece")
                         }
+
                     } else {
+                        console.log("A todos")
 
                         await this.sendNotify(FIREBASE_TOKEN, element.firebase_token, ReplaceableWordsController.replaceByUser(title, currentUser, dayOfWeek), ReplaceableWordsController.replaceByUser(body, currentUser, dayOfWeek), tipo)
 
@@ -111,7 +121,7 @@ class NotificationsController {
 
     static async sendNotify(FIREBASE_TOKEN, fcmToken, title, body, tipo = "comun") {
 
-        console.log(title)
+        console.log("#SEND"+title)
         const data = {
             rules_version: '2',
             notification: {
