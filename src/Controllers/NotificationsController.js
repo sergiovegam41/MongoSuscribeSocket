@@ -96,7 +96,7 @@ class NotificationsController {
 
                         console.log("con filtro de profesion")
                         
-                        const professions_technical_details = await MongoClient.collection(DBNames.professions_technical_details).find({ technical_id: element.userID.toString(), profession_id: { $in: scheduled_notifications.profession_filter.toString() } }).toArray();
+                        const professions_technical_details = await MongoClient.collection(DBNames.professions_technical_details).find({ technical_id: element.userID.toString(), profession_id: { $in: scheduled_notifications.profession_filter } }).toArray();
                         
                         console.log(professions_technical_details)
                         if (professions_technical_details.length > 0) {
