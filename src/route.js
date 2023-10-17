@@ -15,7 +15,7 @@ export default (app, MongoClient) => {
   app.get('/professions',  async (req, res) => ProfessionsController.getProfessions(MongoClient,req,res))
   app.post('/createSheduledNotification',validationMiddleware,  async (req, res) => ProfessionsController.createSheduledNotification(MongoClient,req,res))
   app.post('/updateSheduledNotification/:id',validationMiddleware,  async (req, res) => ProfessionsController.updateSheduledNotification(MongoClient,req,res))
-  app.post('/sendNotifyMany',  async (req, res) => NotificationsController.sendNotifyMany(MongoClient,req,res))
+  app.post('/sendNotifyMany',validationMiddleware,  async (req, res) => NotificationsController.sendNotifyMany(MongoClient,req,res))
   app.get('/getDepartamentsByCountriID/:id',  async (req, res) => LocationController.getDepartamentsByCountrieID(MongoClient,req,res))
   app.get('/getMunicipalysByDepartamentID/:id',  async (req, res) => LocationController.getCitiesByEtateID(MongoClient,req,res))
   
