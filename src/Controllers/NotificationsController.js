@@ -89,13 +89,14 @@ class NotificationsController {
                 if (element.notyfyMe && element.firebase_token && currentUser) {
 
                     console.log("notificarme, firebase y usuario")
+                   console.log("profession_filter: ",scheduled_notifications.profession_filter)
+
 
                     if (scheduled_notifications.profession_filter?.length > 0) {
 
-                        
                         console.log("con filtro de profesion")
                         
-                        const professions_technical_details = await MongoClient.collection(DBNames.professions_technical_details).find({ technical_id: element.userID.toString(), profession_id: { $in: scheduled_notifications.profession_filter } }).toArray();
+                        const professions_technical_details = await MongoClient.collection(DBNames.professions_technical_details).find({ technical_id: element.userID.toString(), profession_id: { $in: scheduled_notifications.profession_filter.toString() } }).toArray();
                         
                         console.log(professions_technical_details)
                         if (professions_technical_details.length > 0) {
