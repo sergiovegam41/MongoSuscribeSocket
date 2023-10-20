@@ -81,6 +81,7 @@ class NotificationsController {
 
             await notifyMeOrders.forEach(async element => {
 
+               try {
                 let currentUser = await MongoClient.collection(DBNames.UserCopy).findOne({ id: parseInt(element.userID) });
 
                 // console.log(currentUser)
@@ -98,9 +99,9 @@ class NotificationsController {
                         
                         const professions_technical_details = await MongoClient.collection(DBNames.professions_technical_details).find({ technical_id: element.userID.toString(), profession_id: { $in: scheduled_notifications.profession_filter } }).toArray();
                         
-                        console.log(professions_technical_details)
+                        console.log("professions_technical_details: ",professions_technical_details)
                         if (professions_technical_details.length > 0) {
-                            console.log("professions_technical_details")
+                            console.log("professions_technical_details DEL USUARIO:",element.userID)
                             await this.sendNotify(FIREBASE_TOKEN, element.firebase_token, ReplaceableWordsController.replaceByUser(title, currentUser, dayOfWeek), ReplaceableWordsController.replaceByUser(body, currentUser, dayOfWeek), tipo)
                         } else {
                             console.log("no pertenece")
@@ -118,6 +119,11 @@ class NotificationsController {
                     console.log("usuario no encontrado")
 
                 }
+               } catch (error) {
+                console.log("#####ERROR NOTIFICANDO####");
+                console.log(error);
+                console.log("##########################");
+               }
             });
 
         }, millisegundos);
@@ -126,7 +132,8 @@ class NotificationsController {
 
     static async sendNotify(FIREBASE_TOKEN, fcmToken, title, body, tipo = "comun") {
 
-        console.log("#SEND"+title)
+        console.log("#SEND title:"+title)
+        console.log("body:"+body)
         const data = {
             rules_version: '2',
             notification: {
@@ -149,7 +156,8 @@ class NotificationsController {
             'Content-Type': 'application/json'
         };
 
-        await http.post(`https://fcm.googleapis.com/fcm/send`, data, { headers: headers });
+       console.log(await http.post(`https://fcm.googleapis.com/fcm/send`, data, { headers: headers })) 
+        
 
     }
 
