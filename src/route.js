@@ -7,7 +7,6 @@ import cron from 'node-cron';
 import SessionsController from './Controllers/SessionsController.js';
 import NotificationsController from './Controllers/NotificationsController.js';
 
-
 export default (app, MongoClient) => {
 
   app.post('/rate-service', async (req, res) => StartsController.rate(MongoClient,req,res))
@@ -50,7 +49,7 @@ export default (app, MongoClient) => {
     formattedTime++;
 
   }
-
+  
 
   // console.log(UTCRangeTimeInvert);
   UTCRangeTimeInvert.forEach(function(valor, clave) {

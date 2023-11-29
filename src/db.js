@@ -20,6 +20,9 @@ export class DBNames {
     static professions_technical_details = "professions_technical_details";
     static UserCopy = "UserCopy";
     static sessionTokens = "session_tokens";
+    static forms_professions = "forms_professions";
+    static categories = "categories";
+    static detail_categories = "detail_categories";
     
 } 
 
