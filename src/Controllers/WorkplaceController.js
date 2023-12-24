@@ -30,7 +30,20 @@ class WorkplaceController {
       let coountri = await MongoClient.collection(DBNames.countries).findOne({_id: new ObjectId(user.countri_id)})
       let municipaly =await MongoClient.collection(DBNames.municipalities).findOne({_id: new ObjectId(user.municipality_id  )})
   
-      return { countrIcon: coountri.icon, countriName: coountri.name??"", municipalyName: municipaly.name, ...user };
+    
+     let data = { countrIcon: coountri.icon, countriName: coountri.name??"", municipalyName: municipaly.name, ...user };
+
+     if(res != null){
+      return res.send({
+
+        success:true,
+        message: "OK",
+        data: data
+        
+      })
+    }
+
+    return data;
     }
 
     if(res != null){
