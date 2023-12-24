@@ -21,10 +21,8 @@ class ClienteServicesSocket {
                 }
                 
                 let fuzzyRegex = createFuzzyRegex(searchTerm);
-
                 let searchQuery = { name: { $regex: fuzzyRegex } };
 
-             
                 let results = await  MongoClient.collection(DBNames.forms_professions).find(searchQuery).toArray();
                 console.log(results)
                 clientSocket.emit(`server:${this.servicesName}:searchResults`, results);
@@ -37,10 +35,6 @@ class ClienteServicesSocket {
             clientSocket.emit(`server:${this.servicesName}:setFormsByCategorieName`, await getFormsByCategorieName(categorieName));
         })
 
-        clientSocket.on(`client:${this.servicesName}:getAnuncio`, async (categorieName) => {
-            clientSocket.emit(`server:${this.servicesName}:setFormsByCategorieName`, await getFormsByCategorieName(categorieName));
-        })
-
 
         clientSocket.emit(`server:${this.servicesName}:init`, { success: true, code:"",msj:"", initData: { categories: await MongoClient.collection(DBNames.categories).find({ active: "1" }).toArray(), frecuentes:  await getFormsByCategorieName("AIRE ACONDICIONADO")} })
 
@@ -49,11 +43,6 @@ class ClienteServicesSocket {
             console.log('Client disconnected');
 
         });
-
-
-
-        
-      
 
         async function getFormsByCategorieName(name){
             const { _id: frecuentesId } = await MongoClient.collection(DBNames.categories).findOne({ name: name });

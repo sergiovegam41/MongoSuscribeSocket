@@ -6,10 +6,12 @@ import moment from "moment";
 import cron from 'node-cron';
 import SessionsController from './Controllers/SessionsController.js';
 import NotificationsController from './Controllers/NotificationsController.js';
+import AnunciosController from './Controllers/AnunciosController.js';
 
 export default (app, MongoClient) => {
 
   app.post('/rate-service', async (req, res) => StartsController.rate(MongoClient,req,res))
+  app.get('/getAnuncios', async (req, res) => AnunciosController.getAnuncios(MongoClient,req,res))
   app.get('/getCountries', async (req, res) => LocationController.getCountries(MongoClient,req,res))
   app.get('/professions',  async (req, res) => ProfessionsController.getProfessions(MongoClient,req,res))
   app.post('/createSheduledNotification',validationMiddleware,  async (req, res) => ProfessionsController.createSheduledNotification(MongoClient,req,res))

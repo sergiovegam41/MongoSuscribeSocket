@@ -23,6 +23,7 @@ export class DBNames {
     static forms_professions = "forms_professions";
     static categories = "categories";
     static detail_categories = "detail_categories";
+    static anuncios = "anuncios";
     
 } 
 
