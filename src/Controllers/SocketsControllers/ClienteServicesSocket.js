@@ -34,15 +34,15 @@ class ClienteServicesSocket {
         });
 
         clientSocket.on(`client:${this.servicesName}:getFormsByCategorieName`, async (categorieName) => {
-
             clientSocket.emit(`server:${this.servicesName}:setFormsByCategorieName`, await getFormsByCategorieName(categorieName));
+        })
 
+        clientSocket.on(`client:${this.servicesName}:getAnuncio`, async (categorieName) => {
+            clientSocket.emit(`server:${this.servicesName}:setFormsByCategorieName`, await getFormsByCategorieName(categorieName));
         })
 
 
-
-        clientSocket.emit(`server:${this.servicesName}:init`, { success: true, code:"",msj:"", initData: { categories: await MongoClient.collection(DBNames.categories).find({ active: "1" }).toArray(), frecuentes:  await getFormsByCategorieName("Frecuentes")} })
-
+        clientSocket.emit(`server:${this.servicesName}:init`, { success: true, code:"",msj:"", initData: { categories: await MongoClient.collection(DBNames.categories).find({ active: "1" }).toArray(), frecuentes:  await getFormsByCategorieName("AIRE ACONDICIONADO")} })
 
         clientSocket.on('disconnect', () => {
             
