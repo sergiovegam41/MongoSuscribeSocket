@@ -1,7 +1,8 @@
 
 import { DBNames } from "../../db.js";
-import { ObjectID } from 'mongodb';
+
 import { ServerApiVersion, ObjectId } from 'mongodb';
+import WorkplaceController from "../WorkplaceController.js";
 
 
 class TecnicoServicesSocket {
@@ -77,35 +78,8 @@ let  searchOrCreateNotifyMeByUserID = async function  (userID,firebase_token=nul
   }
 
   let  searchOrTechnicalWorkplaceUserID = async function  (userID) {
-  
-  if(userID == null){
-    return null
+    return await WorkplaceController.searchOrTechnicalWorkplaceUserID(MongoClient, {query: {userID: userID}} )
   }
-
-  const user = await MongoClient.collection(DBNames.technical_workplace).findOne({ user_id:userID });
-
-  if (!user) {
-    const newUser = {
-      user_id: userID,
-      countri_id:null,
-      departament_id:null,
-      municipality_id:null
-    };
-    await MongoClient.collection(DBNames.technical_workplace).insertOne(newUser);
-    return await MongoClient.collection(DBNames.technical_workplace).findOne({ user_id:userID });
-  }
-
-  if(user.countri_id && user.municipality_id ){
-
-    let coountri = await MongoClient.collection(DBNames.countries).findOne({_id: new ObjectId(user.countri_id)})
-    let municipaly =await MongoClient.collection(DBNames.municipalities).findOne({_id: new ObjectId(user.municipality_id  )})
-
-    return { countrIcon: coountri.icon, countriName: coountri.name??"", municipalyName: municipaly.name, ...user };
-  }
-
-  return user
-
-}
 
 let getCurrentData = async (data = {page: 1, perPage: 10, professionIds: null}, municipaly_id)=>{
 

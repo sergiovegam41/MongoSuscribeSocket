@@ -4,6 +4,8 @@ import { MONGODB_NAME } from './../config.js'
 
 class LocationController {
 
+
+
   static async getCountries(MongoClient, req, res) {
 
     let countries = await MongoClient.collection(DBNames.countries).find({}).toArray()
