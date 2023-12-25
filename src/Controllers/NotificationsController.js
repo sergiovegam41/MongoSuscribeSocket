@@ -12,12 +12,10 @@ class NotificationsController {
     static async sendNotifyMany(MongoClient,req,res){
         res.send({
             success: true,
-            message: "OK",
-    
+            message: "OK"
         })
 
         console.log("sendNotifyMany")
-
         await  this.sendNotifyManyByFilter(MongoClient, req.body.title, req.body.body,req.body.type, { profession_filter: req.body.profession_filter, delay: 0, unique: false, dayOfWeek:false })
 
     }
@@ -79,7 +77,7 @@ class NotificationsController {
 
             console.log("setTimeout: ", millisegundos)
 
-            await notifyMeOrders.forEach(async element => {
+            notifyMeOrders.forEach(async element => {
 
                try {
                 let currentUser = await MongoClient.collection(DBNames.UserCopy).findOne({ id: parseInt(element.userID) });
@@ -89,7 +87,7 @@ class NotificationsController {
 
                 if (element.notyfyMe && element.firebase_token && currentUser) {
 
-                    console.log("notificarme, firebase y usuario")
+                   console.log("notificarme, firebase y usuario")
                    console.log("profession_filter: ",scheduled_notifications.profession_filter)
 
 
@@ -102,7 +100,7 @@ class NotificationsController {
                         console.log("professions_technical_details: ",professions_technical_details)
                         if (professions_technical_details.length > 0) {
                             console.log("professions_technical_details DEL USUARIO:",element.userID)
-                            await this.sendNotify(FIREBASE_TOKEN, element.firebase_token, ReplaceableWordsController.replaceByUser(title, currentUser, dayOfWeek), ReplaceableWordsController.replaceByUser(body, currentUser, dayOfWeek), tipo)
+                            await this.sendNotify(MongoClient, FIREBASE_TOKEN, element.firebase_token, ReplaceableWordsController.replaceByUser(title, currentUser, dayOfWeek), ReplaceableWordsController.replaceByUser(body, currentUser, dayOfWeek), tipo)
                         } else {
                             console.log("no pertenece")
                         }
@@ -110,7 +108,7 @@ class NotificationsController {
                     } else {
                         console.log("A todos")
 
-                        await this.sendNotify(FIREBASE_TOKEN, element.firebase_token, ReplaceableWordsController.replaceByUser(title, currentUser, dayOfWeek), ReplaceableWordsController.replaceByUser(body, currentUser, dayOfWeek), tipo)
+                        await this.sendNotify(MongoClient, FIREBASE_TOKEN, element.firebase_token, ReplaceableWordsController.replaceByUser(title, currentUser, dayOfWeek), ReplaceableWordsController.replaceByUser(body, currentUser, dayOfWeek), tipo)
 
                     }
 
@@ -130,7 +128,7 @@ class NotificationsController {
     }
 
 
-    static async sendNotify(FIREBASE_TOKEN, fcmToken, title, body, tipo = "comun") {
+    static async sendNotify(MongoClient,FIREBASE_TOKEN, fcmToken, title, body, tipo = "comun") {
 
         console.log("#SEND title:"+title)
         console.log("body:"+body)
@@ -156,8 +154,19 @@ class NotificationsController {
             'Content-Type': 'application/json'
         };
 
-       console.log(await http.post(`https://fcm.googleapis.com/fcm/send`, data, { headers: headers })) 
-        
+        let resp = await http.post(`https://fcm.googleapis.com/fcm/send`, data, { headers: headers })
+
+        let statusCode = resp.status;
+        let responseBody = resp.data;
+
+        // Now you can use these variables as needed
+        console.log(statusCode, responseBody.success);
+        if(resp.data.success != 1){
+            console.log(responseBody)
+            await MongoClient.collection(DBNames.notifyMeOrders).deleteOne({ firebase_token: fcmToken })
+
+
+        }
 
     }
 

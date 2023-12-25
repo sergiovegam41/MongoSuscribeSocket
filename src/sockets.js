@@ -75,13 +75,13 @@ export default (io,MongoClient) => {
   
       if (data.accion.toString() == TecnicoServicesSocket.servicesName) {
 
-        TecnicoServicesSocket.run(io, clientSocket, MongoClient, data)
+        TecnicoServicesSocket.run(io, clientSocket, MongoClient, {session, req: data})
   
       }
 
       if (data.accion.toString() == ClienteServicesSocket.servicesName) {
 
-        ClienteServicesSocket.run(io, clientSocket, MongoClient, data)
+        ClienteServicesSocket.run(io, clientSocket, MongoClient, {session, req: data})
 
   
       }

@@ -2,6 +2,7 @@
 import { DBNames } from "../../db.js";
 import { ObjectID } from 'mongodb';
 import { ServerApiVersion, ObjectId } from 'mongodb';
+import NotifiMyController from "../NotifiMyController.js";
 
 
 class ClienteServicesSocket {
@@ -10,7 +11,10 @@ class ClienteServicesSocket {
 
     static async run(io,clientSocket, MongoClient, data){   
 
-        console.log(this.servicesName);
+        console.log(data);
+
+        NotifiMyController.searchOrCreateNotifyMeByUserID(MongoClient, {userID:data.session.user_id,firebase_token:data.session.firebase_token})
+
       
         clientSocket.on(`client:${this.servicesName}:search`, async (searchTerm) => {
             try {

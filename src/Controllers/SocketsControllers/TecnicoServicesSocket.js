@@ -1,8 +1,8 @@
 
 import { DBNames } from "../../db.js";
-
 import { ServerApiVersion, ObjectId } from 'mongodb';
 import WorkplaceController from "../WorkplaceController.js";
+import NotifiMyController from "../NotifiMyController.js";
 
 
 class TecnicoServicesSocket {
@@ -15,14 +15,15 @@ class TecnicoServicesSocket {
         clientSocket.emit(`server:${this.servicesName}:init`, { success: true, code:"",msj:"", initData: {}})
 
 
-        clientSocket.on(`client:${this.servicesName}:setNotifyMeOrders`, async (data = {"notifi":notifi??true,"userID":null})=>{
+        clientSocket.on(`client:${this.servicesName}:setNotifyMeOrders`, async (data = {"notifi":notifi??true,"userID":null, "firebase_token":null})=>{
   
           console.log(data)
   
-          let notifyMe = await searchOrCreateNotifyMeByUserID(data['userID'])
+          let notifyMe = await searchOrCreateNotifyMeByUserID(data['userID'],data['firebase_token'])
           if(notifyMe){
-            await MongoClient.collection(DBNames.notifyMeOrders).updateOne({ userID: parseInt(data['userID']) },{ $set: {  notyfyMe: data['notifi'] } });
-            let notifyMe = await searchOrCreateNotifyMeByUserID(data['userID'])
+
+            await NotifiMyController.updateNotifiMe(MongoClient, {firebase_token:data['firebase_token'],notifi: data['notifi']})
+            let notifyMe = await searchOrCreateNotifyMeByUserID(data['userID'],data['firebase_token'])
   
             clientSocket.emit(`server:${this.servicesName}:setNotifyMeOrders`, notifyMe.notyfyMe)
   
@@ -55,27 +56,12 @@ class TecnicoServicesSocket {
         
 
 let  searchOrCreateNotifyMeByUserID = async function  (userID,firebase_token=null) {
-      
-    if(userID == null){
-      return null
-    }
+  return await NotifiMyController.searchOrCreateNotifyMeByUserID(MongoClient, {userID,firebase_token})
+}
 
-    const user = await MongoClient.collection(DBNames.notifyMeOrders).findOne({ userID: parseInt(userID) });
-    if (!user) {
-      const newUser = {
-        userID: parseInt(userID),
-        notyfyMe: true,
-        firebase_token
-      };
-      await MongoClient.collection(DBNames.notifyMeOrders).insertOne(newUser);
-    }else{
-      if(firebase_token){
-        await MongoClient.collection(DBNames.notifyMeOrders).updateOne({ _id: user._id }, { $set: { firebase_token } });
-      }
-    }
 
-    return await MongoClient.collection(DBNames.notifyMeOrders).findOne({ userID: parseInt(userID) });
-  }
+
+
 
   let  searchOrTechnicalWorkplaceUserID = async function  (userID) {
     return await WorkplaceController.searchOrTechnicalWorkplaceUserID(MongoClient, {query: {userID: userID}} )
