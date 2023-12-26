@@ -9,11 +9,11 @@ class ClienteServicesSocket {
 
     static servicesName = "clienteServices"
 
-    static async run(io,clientSocket, MongoClient, data){   
+    static async run(io,clientSocket, MongoClient, userData){   
 
-        console.log(data);
+        console.log(userData);
 
-        NotifiMyController.searchOrCreateNotifyMeByUserID(MongoClient, {userID:data.session.user_id,firebase_token:data.session.firebase_token})
+        NotifiMyController.searchOrCreateNotifyMeByUserID(MongoClient, {userID:userData.session.user_id,firebase_token:userData.session.firebase_token})
 
       
         clientSocket.on(`client:${this.servicesName}:search`, async (searchTerm) => {

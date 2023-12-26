@@ -9,7 +9,8 @@ class TecnicoServicesSocket {
 
   static servicesName = "tecnicoServices"
 
-    static async run(io,clientSocket, MongoClient, data){
+    static async run(io,clientSocket, MongoClient, userData){
+
 
         console.log(this.servicesName);
         clientSocket.emit(`server:${this.servicesName}:init`, { success: true, code:"",msj:"", initData: {}})
@@ -19,11 +20,11 @@ class TecnicoServicesSocket {
   
           console.log(data)
   
-          let notifyMe = await searchOrCreateNotifyMeByUserID(data['userID'],data['firebase_token'])
+          let notifyMe = await searchOrCreateNotifyMeByUserID(userData.session.user_id,data['firebase_token'])
           if(notifyMe){
 
             await NotifiMyController.updateNotifiMe(MongoClient, {firebase_token:data['firebase_token'],notifi: data['notifi']})
-            let notifyMe = await searchOrCreateNotifyMeByUserID(data['userID'],data['firebase_token'])
+            let notifyMe = await searchOrCreateNotifyMeByUserID(userData.session.user_id,data['firebase_token'])
   
             clientSocket.emit(`server:${this.servicesName}:setNotifyMeOrders`, notifyMe.notyfyMe)
   
@@ -33,11 +34,11 @@ class TecnicoServicesSocket {
   
         clientSocket.on(`client:${this.servicesName}:getData`, async (data = {paginate: {page: 1, perPage: 10, professionIds: null},userID: null,firebase_token:null})=>{
   
-          let technical_workplace = await searchOrTechnicalWorkplaceUserID(data['userID'])
+          let technical_workplace = await searchOrTechnicalWorkplaceUserID(userData.session.user_id)
           let resp = await getCurrentData(data['paginate'], technical_workplace.municipality_id);
-          let notifyMe = await searchOrCreateNotifyMeByUserID(data['userID'],data.firebase_token)
-          let starts = await searchStartsByUserID(data['userID'])
-          let briefcase = await searchBriefcasesrsByUserID(data['userID'])
+          let notifyMe = await searchOrCreateNotifyMeByUserID(userData.session.user_id,data.firebase_token)
+          let starts = await searchStartsByUserID(userData.session.user_id)
+          let briefcase = await searchBriefcasesrsByUserID(userData.session.user_id)
   
           // console.log(technical_workplace)
           

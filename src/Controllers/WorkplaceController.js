@@ -6,7 +6,7 @@ class WorkplaceController {
 
 
   static async searchOrTechnicalWorkplaceUserID(MongoClient, req, res = null){
-    let userID =  req.query.userID;
+    let userID = parseInt( req.query.userID );
 
     if(userID == null){
       return null

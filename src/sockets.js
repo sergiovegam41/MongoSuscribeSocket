@@ -65,13 +65,14 @@ export default (io,MongoClient) => {
   
     async function start(io, clientSocket, MongoClient, data) {
   
+
       let session = null;
       try {
         session = await SessionsController.getCurrentSession(MongoClient, { headers: { authorization: data.token } })
       } catch (error) {
   
       }
-  
+
   
       if (data.accion.toString() == TecnicoServicesSocket.servicesName) {
 
