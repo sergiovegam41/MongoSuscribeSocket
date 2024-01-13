@@ -7,7 +7,7 @@ import NotifiMyController from "../NotifiMyController.js";
 
 class TecnicoServicesSocket {
 
-  static servicesName = "tecnicoServices"
+    static servicesName = "tecnicoServices"
 
     static async run(io,clientSocket, MongoClient, userData){
 
@@ -54,7 +54,6 @@ class TecnicoServicesSocket {
 
 
 
-        
 
 let  searchOrCreateNotifyMeByUserID = async function  (userID,firebase_token=null) {
   return await NotifiMyController.searchOrCreateNotifyMeByUserID(MongoClient, {userID,firebase_token})

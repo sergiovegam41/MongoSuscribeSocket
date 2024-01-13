@@ -8,9 +8,14 @@ import SessionsController from './Controllers/SessionsController.js';
 import NotificationsController from './Controllers/NotificationsController.js';
 import AnunciosController from './Controllers/AnunciosController.js';
 import WorkplaceController from './Controllers/WorkplaceController.js';
+import ClientRequestController from './Controllers/ClientRequestController.js';
+import multer from 'multer';
+import NotifiMyController from './Controllers/NotifiMyController.js';
+const upload = multer({ dest: 'uploads/' });
 
 export default (app, MongoClient) => {
 
+  app.post('/createRequest', validationMiddleware, upload.any(), async (req, res) =>  ClientRequestController.createRequest(MongoClient, req, res));  
   app.post('/rate-service', async (req, res) => StartsController.rate(MongoClient,req,res))
   app.get('/getAnuncios', async (req, res) => AnunciosController.getAnuncios(MongoClient,req,res))
   app.get('/getWorkplace', async (req, res) => WorkplaceController.searchOrTechnicalWorkplaceUserID(MongoClient,req,res))
@@ -19,6 +24,8 @@ export default (app, MongoClient) => {
   app.post('/createSheduledNotification',validationMiddleware,  async (req, res) => ProfessionsController.createSheduledNotification(MongoClient,req,res))
   app.post('/updateSheduledNotification/:id',validationMiddleware,  async (req, res) => ProfessionsController.updateSheduledNotification(MongoClient,req,res))
   app.post('/sendNotifyMany',validationMiddleware,  async (req, res) => NotificationsController.sendNotifyMany(MongoClient,req,res))
+  app.post('/getNotifyMe',validationMiddleware,  async (req, res) => NotifiMyController.getNotifyMe(MongoClient,req,res))
+  app.post('/setNotifyMe',validationMiddleware,  async (req, res) => NotifiMyController.setNotifyMe(MongoClient,req,res))
   app.get('/getDepartamentsByCountriID/:id',  async (req, res) => LocationController.getDepartamentsByCountrieID(MongoClient,req,res))
   app.get('/getMunicipalysByDepartamentID/:id',  async (req, res) => LocationController.getCitiesByEtateID(MongoClient,req,res))
   
@@ -26,11 +33,12 @@ export default (app, MongoClient) => {
     return res.send(true)
   })
 
-
   async function validationMiddleware(req, res, next) {
 
     console.log("validationMiddleware");
+    
     try {
+      
       let session = await SessionsController.getCurrentSession(MongoClient, req)
       if (session) {
         return next()

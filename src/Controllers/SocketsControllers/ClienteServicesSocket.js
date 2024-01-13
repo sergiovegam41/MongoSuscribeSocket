@@ -11,7 +11,7 @@ class ClienteServicesSocket {
 
     static async run(io,clientSocket, MongoClient, userData){   
 
-        console.log(userData);
+        // console.log(userData);
 
         NotifiMyController.searchOrCreateNotifyMeByUserID(MongoClient, {userID:userData.session.user_id,firebase_token:userData.session.firebase_token})
 
