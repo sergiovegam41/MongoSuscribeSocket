@@ -2,6 +2,10 @@ import http from 'axios';
 import { DBNames } from './../db.js';
 import moment from "moment";
 import ReplaceableWordsController from '../Utils/ReplaceableWordsController.js';
+import nodemailer from "nodemailer";
+import EmailsController from './EmailsController.js';
+import WhatsAppController from './WhatsAppController.js';
+import UserConfigController from './UserConfigController.js';
 
 
 
@@ -15,6 +19,7 @@ class NotificationsController {
             message: "OK"
         })
 
+   
         console.log("sendNotifyMany")
         await  this.sendNotifyManyByFilter(MongoClient, req.body.title, req.body.body,req.body.type, { profession_filter: req.body.profession_filter, delay: 0, unique: false, dayOfWeek:false })
 
@@ -115,7 +120,7 @@ class NotificationsController {
                 } else {
 
                     console.log("usuario no encontrado")
-
+ 
                 }
                } catch (error) {
                 console.log("#####ERROR NOTIFICANDO####");
@@ -128,7 +133,71 @@ class NotificationsController {
     }
 
 
+    static async notificarByUserID(MongoClient,FIREBASE_TOKEN, HostBotWhatsApp, TokenWebhook, userID, title, body, tipo = "comun"){
+
+
+        console.log(userID)
+        let currentUser =  await MongoClient.collection(DBNames.UserCopy).findOne({ id: parseInt(userID) });
+
+        if(!currentUser){
+            return;
+        }
+        try {
+            
+            const now = moment();
+            const dayOfWeek = now.day();
+            
+            let topic =  ReplaceableWordsController.replaceByUser(title, currentUser, dayOfWeek);
+            let msj = ReplaceableWordsController.replaceByUser(body, currentUser, dayOfWeek);
+
+            let dispositivos = await MongoClient.collection(DBNames.notifyMeOrders).find({ notyfyMe: true,userID:  parseInt(userID) }).toArray()
+            dispositivos.forEach(async dispositivo => {
+
+                if(dispositivo.notyfyMe){
+                try {
+                    this.sendNotify(MongoClient,FIREBASE_TOKEN, dispositivo.firebase_token, topic, msj, tipo );
+                } catch (error) {
+                    
+                }
+                }
+
+            })
+
+            let CurrentUserConfig = await UserConfigController.searchOrCreateByUserID(MongoClient,parseInt(userID)) 
+
+
+            if(CurrentUserConfig.notyfyMeByWhatsApp){
+                WhatsAppController.sendMessageByPhone(HostBotWhatsApp,TokenWebhook,`${currentUser.country_code}${currentUser.phone}`, `*${topic.trim()}*\n${msj}` )
+            }
+            if(CurrentUserConfig.notyfyMeByEmail){
+                EmailsController.sendMailNotiFy(currentUser.email_aux,topic,msj);
+            }
+
+        
+        } catch (error) {
+            
+
+            console.log("[ERROR EN NotificationsController.notificarByUserID]")
+            console.log(userID)
+            console.log(FIREBASE_TOKEN)
+            console.log(HostBotWhatsApp)
+            console.log(TokenWebhook)
+            console.log(title)
+            console.log(body)
+            console.log(tipo)
+            console.log(error)
+        }
+
+    }
+
+    // static async notifyByEmail(){
+
+    // }
+
+    
     static async sendNotify(MongoClient,FIREBASE_TOKEN, fcmToken, title, body, tipo = "comun") {
+
+        console.log(`Enviando notificacion a ${fcmToken}, mensaje: ${title}`)
 
         console.log("#SEND title:"+title)
         console.log("body:"+body)
@@ -157,7 +226,7 @@ class NotificationsController {
         let resp = await http.post(`https://fcm.googleapis.com/fcm/send`, data, { headers: headers })
 
         let statusCode = resp.status;
-        let responseBody = resp.data;
+        let responseBody = resp.data; 
 
         // Now you can use these variables as needed
         console.log(statusCode, responseBody.success);

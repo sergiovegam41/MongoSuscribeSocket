@@ -1,6 +1,7 @@
 import { DBNames } from './../db.js';
 import { MONGODB_NAME } from './../config.js'
 import SessionsController from './SessionsController.js';
+import UserConfigController from './UserConfigController.js';
 
 
 class NotifiMyController {
@@ -15,7 +16,8 @@ class NotifiMyController {
 
     let userID = parseInt(req.userID)
     let firebase_token= req.firebase_token
-      
+    let CurrentUserConfig = await UserConfigController.searchOrCreateByUserID(MongoClient,req.userID) 
+
     console.log(userID)
     console.log(firebase_token)
     if(firebase_token == null || userID == null){
@@ -27,8 +29,6 @@ class NotifiMyController {
       const newUser = {
         userID: userID,
         notyfyMe: true,
-        notyfyMeByWhatsApp: true,
-        notyfyMeByEmail: false,
         firebase_token
       };
       await MongoClient.collection(DBNames.notifyMeOrders).insertOne(newUser);
@@ -38,7 +38,12 @@ class NotifiMyController {
       }
     }
 
-    return await MongoClient.collection(DBNames.notifyMeOrders).findOne({ firebase_token: firebase_token });
+    let resp = { 
+      ...(await MongoClient.collection(DBNames.notifyMeOrders).findOne({ firebase_token: firebase_token })),
+      ...CurrentUserConfig  
+}
+
+    return resp;
 
   }
 
@@ -47,14 +52,14 @@ class NotifiMyController {
 
    let session = await SessionsController.getCurrentSession(MongoClient,  req)
 
-    console.log(session)
+    console.log("getNotifyMe")
     if(session.userApp){
       return res.send({
         success:true,
         message: "OK",
         data: await this.searchOrCreateNotifyMeByUserID(MongoClient,{
           firebase_token: session.firebase_token,
-          userID: session.user.id
+          userID: session.user.id,
         })
       })
     }
@@ -72,15 +77,22 @@ class NotifiMyController {
       userID: session.user.id
     })
 
-    await MongoClient.collection(DBNames.notifyMeOrders).updateOne({ _id: notifyMe._id }, { $set: {
-      "notyfyMe": req.body.notyfyMe,
-      "notyfyMeByPush": req.body.notyfyMeByPush,
-      "notyfyMeByWhatsApp": req.body.notyfyMeByWhatsApp,
-      "notyfyMeByEmail": req.body.notyfyMeByEmail
+
+console.log( "notyfyMe")
+console.log( notifyMe)
+  let a = await MongoClient.collection(DBNames.notifyMeOrders).updateOne({ userID: parseInt(session.user.id) }, { $set: {
+    notyfyMe: req.body.notyfyMe
+  } });
+
+  await MongoClient.collection(DBNames.UserConfig).updateOne({ userID: parseInt(session.user.id)}, { $set:{
+
+    notyfyMeByWhatsApp: req.body.notyfyMeByWhatsApp,
+    notyfyMeByEmail:  req.body.notyfyMeByEmail
+
   } });
 
 
-    return res.send({
+    return res.send({ 
       success:true,
       message: "OK",
       data: await this.searchOrCreateNotifyMeByUserID(MongoClient,{
@@ -92,7 +104,7 @@ class NotifiMyController {
   }
   
 
-}
+}     
 
 
 

@@ -12,7 +12,8 @@ class ClienteServicesSocket {
     static async run(io,clientSocket, MongoClient, userData){   
 
         // console.log(userData);
-
+        try {
+            
         NotifiMyController.searchOrCreateNotifyMeByUserID(MongoClient, {userID:userData.session.user_id,firebase_token:userData.session.firebase_token})
 
       
@@ -39,8 +40,7 @@ class ClienteServicesSocket {
             clientSocket.emit(`server:${this.servicesName}:setFormsByCategorieName`, await getFormsByCategorieName(categorieName));
         })
 
-
-        clientSocket.emit(`server:${this.servicesName}:init`, { success: true, code:"",msj:"", initData: { categories: await MongoClient.collection(DBNames.categories).find({ active: "1" }).toArray(), frecuentes:  await getFormsByCategorieName("AIRE ACONDICIONADO")} })
+        clientSocket.emit(`server:${this.servicesName}:init`, { success: true, code:"",msj:"", initData: { categories: (await MongoClient.collection(DBNames.categories).find({ active: "1" }).toArray()).sort((a, b) => {return parseInt(a.sortin) - parseInt(b.sortin);}) , frecuentes:  await getFormsByCategorieName("AIRE ACONDICIONADO")} })
 
         clientSocket.on('disconnect', () => {
             
@@ -55,6 +55,11 @@ class ClienteServicesSocket {
                 MongoClient.collection(DBNames.forms_professions).find({ professions_id: professions_id.toString() }).toArray()
             ))).flat();
             return frecuentes
+        }
+        } catch (error) {
+            console.log("[ERROR EN ClienteServicesSocket.clienteServices]")
+            console.log(userData)
+            console.log(error)
         }
     }   
 
