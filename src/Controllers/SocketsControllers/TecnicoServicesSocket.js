@@ -40,7 +40,9 @@ class TecnicoServicesSocket {
           let starts = await searchStartsByUserID(userData.session.user_id)
           let briefcase = await searchBriefcasesrsByUserID(userData.session.user_id)
   
-          // console.log(technical_workplace)
+
+          
+          console.log(briefcase)
           
           clientSocket.emit(`server:${this.servicesName}:setData`, {orders: resp, notifiMeOrders: notifyMe.notyfyMe, starts: starts,briefcase:briefcase, technical_workplace})
           
@@ -119,8 +121,10 @@ let getCurrentData = async (data = {page: 1, perPage: 10, professionIds: null}, 
 
   async function searchBriefcasesrsByUserID( technical_id ) {
 
+    console.log("searchBriefcasesrsByUserID: ",technical_id)
 
-    const item = await MongoClient.collection(DBNames.briefcases).findOne({ technical_id });
+
+    const item = await MongoClient.collection(DBNames.briefcases).findOne({ technical_id: `${technical_id}` });
 
     if (!item) {
       const newBriefcase = {
@@ -131,7 +135,7 @@ let getCurrentData = async (data = {page: 1, perPage: 10, professionIds: null}, 
       return newBriefcase
     }
 
-    return await MongoClient.collection(DBNames.briefcases).findOne({ technical_id });
+    return await MongoClient.collection(DBNames.briefcases).findOne({technical_id: `${technical_id}`});
 
   }
 

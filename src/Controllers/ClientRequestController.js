@@ -7,6 +7,7 @@ import FormData from 'form-data';
 import fs from 'fs';
 import ServiceModel from '../Models/ServicesModel.js';
 import NotificationsController from './NotificationsController.js';
+import { unlink } from 'fs/promises';
 
 class ClientRequestController {
 
@@ -29,11 +30,7 @@ class ClientRequestController {
 
       if(resultValidate.isValid){
 
-        res.send({
-          success:true,
-          message: "OK",
-          data: null
-        })
+        
 
 
         let images = await this.uploadImages(MongoClient, req);
@@ -44,23 +41,67 @@ class ClientRequestController {
           }
         }
         
-        console.log(data)
+        // console.log(data)
         
-        console.log("findItemByType")
+        // console.log("findItemByType")
         let main_date_time = this.findItemByType(data, FormulariosModel.main_date_time);
         let main_address = this.findItemByType(data, FormulariosModel.main_address);
         let payment_method = this.findItemByType(data, FormulariosModel.payment_method);
+        let priceService = parseInt(form.base_price);
 
+      //  console.log(data)
 
+       for (const key in data) {
+        if (data.hasOwnProperty(key)) {
+          const value = data[key];
+          console.log(`Key: ${key}`);
+          if(value.type == FormulariosModel.select){
+            console.log("Select")
+            console.log(value.value)
+            if(value.field.multioptions){
+              console.log("multioptions")
+              value.value.forEach(option => {
+                const foundItem = value.field.options.find(item => item.name === option);
+                try {
+                  if(foundItem.price){
+                    let price = parseInt(foundItem.price)
+                    priceService += price
+                  }
+                } catch (error) {
+                  
+                }
+
+              });
+           
+            }else{
+              const foundItem = value.field.options.find(item => item.name === value.value);
+              if(foundItem.price){
+             try {
+              let price = parseInt(foundItem.price)
+              priceService += price
+             } catch (error) {
+              
+             }
+              }
+
+            }
+          }
+
+        }
+      }
+      
+
+      console.log(form.base_price)
+      console.log(priceService)
         let servicio = {
-
           "scheduled_date": main_date_time.value.date,
           "scheduled_time": main_date_time.value.time,
           "payment_method": payment_method.value,
           "client_id": `${session.user_id}`,
           "profession_id":`${form.professions_id}`,
-          "amount": `${form.base_price}`,
+          "amount": `${priceService}`,
           "revenue": `${form.revenue}`,
+          "district": `${main_address.value.district}`,
           "is_public": true,
           "direccion": `${main_address.value.address}`,
           "referencia":  `${main_address.value.ref}`,
@@ -76,14 +117,24 @@ class ClientRequestController {
           "form_template":form,
           "filled_form":data,
           "version":`${form.version}`,
-          
         };
 
         // guardar
         let service = await MongoClient.collection(DBNames.services).insertOne(servicio)
-        // console.log(service)
+        res.send({
+          success:true,
+          message: "OK",
+          data: null
+        })
 
-        await NotificationsController.sendNotifyManyByFilter(MongoClient,`${form.name}`,"Hola $[user_name];, tenemos un Nuevo servicio disponible para ti.","comun",{ profession_filter: [form.professions_id], delay: 0, unique: false, dayOfWeek:false })
+        const formatoCOP = new Intl.NumberFormat('es-CO', {
+          style: 'currency',
+          currency: 'COP'
+        });
+        const cantidadFormateada = formatoCOP.format(priceService);
+
+
+        await NotificationsController.sendNotifyManyByFilterV2(MongoClient,[session.location.municipality_id],[form.professions_id],`Nuevo servicio ~ ${cantidadFormateada}`, `Hola $[user_name];, tenemos un Nuevo servicio disponible para ti en ${main_address.value.district}`, "TECNICO","new_services")
 
 
 
@@ -118,7 +169,7 @@ class ClientRequestController {
     for (const image of req.files) {
         let data = new FormData();
         data.append('image', fs.createReadStream(image.path));
-        data.append('folder', 'A');
+        data.append('folder', 'servicios');
 
         let config = {
             method: 'post',
@@ -134,6 +185,8 @@ class ClientRequestController {
         try {
             const response = await axios.request(config);
             responsesMap[image.fieldname] = response.data.resp; 
+            await unlink(image.path);
+
         } catch (error) {
             console.log(error);
             responsesMap[image.fieldname] = 'Error';
@@ -156,8 +209,8 @@ class ClientRequestController {
 
   static async validateFormRequest(data) {
 
-    console.log(data.body)
-    const requiredFieldTypes = [FormulariosModel.main_address, FormulariosModel.payment_method, FormulariosModel.main_date_time];
+    // console.log(data.body)
+    const requiredFieldTypes = [ FormulariosModel.main_address, FormulariosModel.payment_method, FormulariosModel.main_date_time ];
     let fieldTypes = new Set();
   
     for (const key in data.body.data) {

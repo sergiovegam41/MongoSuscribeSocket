@@ -6,11 +6,65 @@ import nodemailer from "nodemailer";
 import EmailsController from './EmailsController.js';
 import WhatsAppController from './WhatsAppController.js';
 import UserConfigController from './UserConfigController.js';
-
-
-
+import { ObjectId } from 'mongodb';
 
 class NotificationsController {
+
+    static async sendNotifyManyByFilterV2(MongoClient, cities = ["649a034560043e9f434a94fe"], professions = ["64c553e73abc6c0ec50e1dc3"], title = "Hola! $[user_name];! bienvenido a Dservices ", body="Dservices te desea un feliz $[dayWeekName];!", role = "TECNICO", tipo="comun"){
+
+        
+        const FIREBASE_TOKEN = (await MongoClient.collection(DBNames.Config).findOne({ name: "FIREBASE_TOKEN" })).value;
+        const TokenWebhook = (await MongoClient.collection(DBNames.Config).findOne({ name: "TokenWebhook" })).value;
+        const HostBotWhatsApp = (await MongoClient.collection(DBNames.Config).findOne({ name: "HostBotWhatsApp" })).value;
+        const cityObjectIds = cities.map(id => ObjectId(id));
+
+        let citiesDocs = null
+
+        if(cityObjectIds.length > 0){
+            citiesDocs = await MongoClient.collection(DBNames.municipalities).find({
+                _id: { $in: cityObjectIds }
+            }).toArray();
+        }else{
+            citiesDocs = await MongoClient.collection(DBNames.municipalities).find({ }).toArray();
+        }
+        
+        if(!citiesDocs){
+            return false; 
+        }
+        
+        citiesDocs.forEach( async citie => {
+            
+            
+            let users = await MongoClient.collection(DBNames.technical_workplace).find({ municipality_id: citie._id.toString() }).toArray();
+
+            if(!users){
+                return false;
+            }
+
+            users.forEach( async user => {
+
+                const professions_technical_details = await MongoClient.collection(DBNames.professions_technical_details).find({ technical_id: user.user_id.toString(), profession_id: { $in: professions??[] } }).toArray();
+    
+                if (professions_technical_details.length > 0) {
+
+                    let currentUser = await MongoClient.collection(DBNames.UserCopy).findOne({ id: parseInt(user.user_id) });
+                    
+                    if(currentUser ){
+                        if(currentUser.current_role == role){
+
+                            this.notificarByUser(MongoClient,FIREBASE_TOKEN, HostBotWhatsApp, TokenWebhook, currentUser, title, body,tipo );
+
+                        }
+                    }
+                   
+
+                } 
+            })
+        });
+
+
+
+    }
 
 
     static async sendNotifyMany(MongoClient,req,res){
@@ -21,6 +75,7 @@ class NotificationsController {
 
    
         console.log("sendNotifyMany")
+
         await  this.sendNotifyManyByFilter(MongoClient, req.body.title, req.body.body,req.body.type, { profession_filter: req.body.profession_filter, delay: 0, unique: false, dayOfWeek:false })
 
     }
@@ -133,15 +188,17 @@ class NotificationsController {
     }
 
 
-    static async notificarByUserID(MongoClient,FIREBASE_TOKEN, HostBotWhatsApp, TokenWebhook, userID, title, body, tipo = "comun"){
+    static async notificarByUser(MongoClient,FIREBASE_TOKEN, HostBotWhatsApp, TokenWebhook, currentUser, title, body, tipo = "comun"){
 
-
-        console.log(userID)
-        let currentUser =  await MongoClient.collection(DBNames.UserCopy).findOne({ id: parseInt(userID) });
-
+        
+        
         if(!currentUser){
             return;
         }
+        
+        let userID = currentUser.id
+        console.log("Notificando usuario: ",currentUser)
+
         try {
             
             const now = moment();
@@ -199,8 +256,6 @@ class NotificationsController {
 
         console.log(`Enviando notificacion a ${fcmToken}, mensaje: ${title}`)
 
-        console.log("#SEND title:"+title)
-        console.log("body:"+body)
         const data = {
             rules_version: '2',
             notification: {
