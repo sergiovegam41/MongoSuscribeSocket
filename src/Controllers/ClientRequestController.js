@@ -109,7 +109,7 @@ class ClientRequestController {
           "municipality_id": `${session.location.municipality_id}`,
           "country_id": `${session.location.countri_id}`,
           "service_title": `${form.name}`,
-          "public_description": `${main_address.value.address}`,
+          "public_description": `Cliente interesado en servicio de ${form.name}`,
           "status": `${ServiceModel.CREATED}`,
           "updated_at": { "$date": new Date().toISOString() },
           "created_at": { "$date": new Date().toISOString() },
