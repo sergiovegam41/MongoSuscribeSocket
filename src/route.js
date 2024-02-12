@@ -12,6 +12,7 @@ import ClientRequestController from './Controllers/ClientRequestController.js';
 import multer from 'multer';
 const upload = multer({ dest: 'uploads/' });
 import NotifiMyController from './Controllers/NotifiMyController.js';
+import OfertasController from './Controllers/OfertasController.js';
 
 export default (app, MongoClient) => {
 
@@ -26,6 +27,8 @@ export default (app, MongoClient) => {
   app.post('/sendNotifyMany',validationMiddleware,  async (req, res) => NotificationsController.sendNotifyMany(MongoClient,req,res))
   app.post('/getNotifyMe',validationMiddleware,  async (req, res) => NotifiMyController.getNotifyMe(MongoClient,req,res))
   app.post('/setNotifyMe',validationMiddleware,  async (req, res) => NotifiMyController.setNotifyMe(MongoClient,req,res))
+  app.get('/getRoadmap',validationMiddleware,  async (req, res) => OfertasController.getRoadmap(MongoClient,req,res))
+  app.post('/ofertar',validationMiddleware,  async (req, res) => OfertasController.startNewOffer(MongoClient,req,res))
   app.get('/getDepartamentsByCountriID/:id',  async (req, res) => LocationController.getDepartamentsByCountrieID(MongoClient,req,res))
   app.get('/getMunicipalysByDepartamentID/:id',  async (req, res) => LocationController.getCitiesByEtateID(MongoClient,req,res))
   

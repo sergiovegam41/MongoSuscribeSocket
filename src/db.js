@@ -25,6 +25,8 @@ export class DBNames {
     static categories = "categories";
     static detail_categories = "detail_categories";
     static anuncios = "anuncios";
+    static serviceOffers = "serviceOffers";
+    static serviceOfferDetails = "serviceOfferDetails";
     
 } 
 

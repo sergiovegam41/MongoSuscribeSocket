@@ -12,19 +12,21 @@ class TecnicoServicesSocket {
     static async run(io,clientSocket, MongoClient, userData){
 
 
+
         console.log(this.servicesName);
         clientSocket.emit(`server:${this.servicesName}:init`, { success: true, code:"",msj:"", initData: {}})
 
 
         clientSocket.on(`client:${this.servicesName}:setNotifyMeOrders`, async (data = {"notifi":notifi??true,"userID":null, "firebase_token":null})=>{
   
-          console.log(data)
+          // console.log(data)
   
-          let notifyMe = await searchOrCreateNotifyMeByUserID(userData.session.user_id,data['firebase_token'])
+          let notifyMe = await NotifiMyController.searchOrCreateNotifyMeByUserID(MongoClient, {userID:userData.session.user_id,firebase_token:data['firebase_token']})
+         
           if(notifyMe){
 
             await NotifiMyController.updateNotifiMe(MongoClient, {firebase_token:data['firebase_token'],notifi: data['notifi']})
-            let notifyMe = await searchOrCreateNotifyMeByUserID(userData.session.user_id,data['firebase_token'])
+            let notifyMe = await NotifiMyController.searchOrCreateNotifyMeByUserID(MongoClient, {userID:userData.session.user_id,firebase_token:data['firebase_token']})
   
             clientSocket.emit(`server:${this.servicesName}:setNotifyMeOrders`, notifyMe.notyfyMe)
   
@@ -36,13 +38,13 @@ class TecnicoServicesSocket {
   
           let technical_workplace = await searchOrTechnicalWorkplaceUserID(userData.session.user_id)
           let resp = await getCurrentData(data['paginate'], technical_workplace.municipality_id);
-          let notifyMe = await searchOrCreateNotifyMeByUserID(userData.session.user_id,data.firebase_token)
+          let notifyMe = await NotifiMyController.searchOrCreateNotifyMeByUserID(MongoClient, {userID:userData.session.user_id,firebase_token:data.firebase_token})
           let starts = await searchStartsByUserID(userData.session.user_id)
           let briefcase = await searchBriefcasesrsByUserID(userData.session.user_id)
   
 
           
-          console.log(briefcase)
+          // console.log(briefcase)
           
           clientSocket.emit(`server:${this.servicesName}:setData`, {orders: resp, notifiMeOrders: notifyMe.notyfyMe, starts: starts,briefcase:briefcase, technical_workplace})
           
@@ -57,9 +59,9 @@ class TecnicoServicesSocket {
 
 
 
-let  searchOrCreateNotifyMeByUserID = async function  (userID,firebase_token=null) {
-  return await NotifiMyController.searchOrCreateNotifyMeByUserID(MongoClient, {userID,firebase_token})
-}
+// let  searchOrCreateNotifyMeByUserID = async function  (userID,firebase_token=null) {
+//   return
+// }
 
 
 

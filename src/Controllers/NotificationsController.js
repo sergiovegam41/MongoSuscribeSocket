@@ -208,14 +208,15 @@ class NotificationsController {
             let msj = ReplaceableWordsController.replaceByUser(body, currentUser, dayOfWeek);
 
             let dispositivos = await MongoClient.collection(DBNames.notifyMeOrders).find({ notyfyMe: true,userID:  parseInt(userID) }).toArray()
-            dispositivos.forEach(async dispositivo => {
+            await dispositivos.forEach(async dispositivo => {
 
                 if(dispositivo.notyfyMe){
-                try {
-                    this.sendNotify(MongoClient,FIREBASE_TOKEN, dispositivo.firebase_token, topic, msj, tipo );
-                } catch (error) {
-                    
-                }
+                    try {
+                        console.log(FIREBASE_TOKEN, dispositivo)
+                        this.sendNotify(MongoClient,FIREBASE_TOKEN, dispositivo.firebase_token, topic, msj, tipo );
+                    } catch (error) {
+                        
+                    }
                 }
 
             })

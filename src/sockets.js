@@ -4,6 +4,7 @@ import { DBNames } from './db.js';
 import SessionsController from './Controllers/SessionsController.js';
 import TecnicoServicesSocket from './Controllers/SocketsControllers/TecnicoServicesSocket.js';
 import ClienteServicesSocket from './Controllers/SocketsControllers/ClienteServicesSocket.js';
+import ClientOffersSocket from './Controllers/SocketsControllers/ClientOffersSocket.js';
 
 
 export default (io,MongoClient) => {
@@ -42,7 +43,9 @@ export default (io,MongoClient) => {
           start(io, socket, MongoClient, data)
   
         } else {
-          io.emit("server:init", { success: false, code: "unauthorized", msj: "No estas autorizado para realizar esta accion." })
+
+          console.log(`server:${data.accion.toString()}:init`);
+          io.emit(`server:${data.accion.toString()}:init`, { success: false, code: "unauthorized", msj: "No estas autorizado para realizar esta accion." })
         }
   
       })
@@ -66,6 +69,8 @@ export default (io,MongoClient) => {
     async function start(io, clientSocket, MongoClient, data) {
   
 
+      console.log("New conection "+data.accion.toString())
+      console.log("start")
       let session = null;
       try {
         session = await SessionsController.getCurrentSession(MongoClient, { headers: { authorization: data.token } })
@@ -83,6 +88,13 @@ export default (io,MongoClient) => {
       if (data.accion.toString() == ClienteServicesSocket.servicesName) {
 
         ClienteServicesSocket.run(io, clientSocket, MongoClient, {session, req: data})
+
+  
+      }
+
+      if (data.accion.toString() == ClientOffersSocket.servicesName) {
+
+        ClientOffersSocket.run(io, clientSocket, MongoClient, {session, req: data})
 
   
       }
