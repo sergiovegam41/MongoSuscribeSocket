@@ -33,6 +33,30 @@ class ClientOffersSocket {
                 "offerts": await getOffertsByServiceID(MongoClient,servicesID)
             });
         })
+      
+        clientSocket.on(`client:${this.servicesName}:acceptOffert`, async (offert) => {
+
+
+            // Desactivar todas las otras ofertas realizadas a ese servicio
+
+
+            //Desactivar las otras ofertas del tecnico seleccionado
+            print("")            
+            
+         
+        })
+
+        clientSocket.on(`client:${this.servicesName}:dismissOffert`, async (offert) => {
+
+            console.log(offert)
+
+            await MongoClient.collection(DBNames.serviceOffers).updateOne({  _id: ObjectId(offert.offertID)}, { $set: {  status: 0} });
+
+            clientSocket.emit(`server:${this.servicesName}:setOffertsByServicesID`, {
+                "offerts": await getOffertsByServiceID(MongoClient,offert.servicesID)
+            });
+
+        })
 
 
     
@@ -46,25 +70,45 @@ class ClientOffersSocket {
             let services = await MongoClient.collection(DBNames.services).find({
                 client_id: userData.session.user_id.toString(),
                 status: { $in: ["CREATED", "ASSIGNED"] }
+            }).sort({
+                created_at: -1 
             }).toArray();
             return services
         }
      
         async function getOffertsByServiceID(MongoClient, serviceID) {
             let offerts = await MongoClient.collection(DBNames.serviceOffers).find({
-                services_id: ObjectId(serviceID)
+                services_id: ObjectId(serviceID),
+                status:1
             }).toArray();
         
             let finalData = [];
             
             for (let offert of offerts) {
+
                 let detailsOffert = await MongoClient.collection(DBNames.serviceOfferDetails).find({
-                    service_offer_id: offert._id
+                    service_offer_id: offert._id,
                 }).toArray();
-        
+
+                let user = await MongoClient.collection(DBNames.UserCopy).findOne({id:parseInt(offert.technician_id)})
+
+                let start = await MongoClient.collection(DBNames.technical_stars).findOne({technical_id:offert.technician_id.toString()})
+                
+                let startsHistory = await MongoClient.collection(DBNames.technical_stars_services_detail).find({technical_id:offert.technician_id.toString()}).toArray()
+                let ctnServices = 0;
+                
+                if( startsHistory != null && startsHistory != []){
+
+                    ctnServices = parseInt( startsHistory.length )
+                }
+                
+
                 finalData.push({
                     offert,
-                    detailsOffert
+                    detailsOffert,
+                    start,
+                    ctnServices,
+                    user
                 });
             }
         

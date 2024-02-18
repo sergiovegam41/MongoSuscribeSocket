@@ -101,7 +101,9 @@ let getCurrentData = async (data = {page: 1, perPage: 10, professionIds: null}, 
  
   
   async function searchStartsByUserID( technical_id ) {
-
+    
+    technical_id = technical_id.toString()
+    
     // console.log(technical_id)
 
     const item = await MongoClient.collection(DBNames.technical_stars).findOne({ technical_id });
