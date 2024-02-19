@@ -34,19 +34,33 @@ export default (io,MongoClient) => {
 
     io.on('connection', async (socket) => {
 
+      let init = true;
+      let actionsExecuted = [];
+
       console.log("New conecction")
 
       socket.on("cliente:tryAutch", async (data) => {
 
         if (await validationMiddleware(data)) {
-          console.log("Next")
-          start(io, socket, MongoClient, data)
+          console.log("Next");
+
+          if( !actionsExecuted.includes(data.accion.toString())){
+            init = true;
+          }
+          if(init){
+
+            init = false;
+            actionsExecuted.push(data.accion.toString())
+
+            await start(io, socket, MongoClient, data);
+          }
   
         } else {
-
           console.log(`server:${data.accion.toString()}:init`);
-          io.emit(`server:${data.accion.toString()}:init`, { success: false, code: "unauthorized", msj: "No estas autorizado para realizar esta accion." })
+          socket.emit(`server:${data.accion.toString()}:init`, { success: false, code: "unauthorized", msj: "No estas autorizado para realizar esta accion." })
         }
+
+        socket.emit(`server:AutchSuccess`, true)
   
       })
   
@@ -89,7 +103,6 @@ export default (io,MongoClient) => {
 
         ClienteServicesSocket.run(io, clientSocket, MongoClient, {session, req: data})
 
-  
       }
 
       if (data.accion.toString() == ClientOffersSocket.servicesName) {
@@ -98,6 +111,8 @@ export default (io,MongoClient) => {
 
   
       }
+
+    
   
     }
   

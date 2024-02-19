@@ -16,6 +16,16 @@ class ClienteServicesSocket {
             
         NotifiMyController.searchOrCreateNotifyMeByUserID(MongoClient, {userID:userData.session.user_id,firebase_token:userData.session.firebase_token})
 
+        
+        console.log("RUN HOME CLIENTE")
+        // console.log(this.servicesName);
+        clientSocket.on(`client:${this.servicesName}:init`, async (data) => {
+
+            console.log("el init de cliente home")
+
+          clientSocket.emit(`server:${this.servicesName}:init`, { success: true, code:"",msj:"", initData: { categories: (await MongoClient.collection(DBNames.categories).find({ active: "1" }).toArray()).sort((a, b) => {return parseInt(a.sortin) - parseInt(b.sortin);}) , frecuentes:  await getFormsByCategorieName("AIRE ACONDICIONADO")} })
+
+        })
       
         clientSocket.on(`client:${this.servicesName}:search`, async (searchTerm) => {
             try {
@@ -40,11 +50,12 @@ class ClienteServicesSocket {
             clientSocket.emit(`server:${this.servicesName}:setFormsByCategorieName`, await getFormsByCategorieName(categorieName));
         })
 
-        clientSocket.emit(`server:${this.servicesName}:init`, { success: true, code:"",msj:"", initData: { categories: (await MongoClient.collection(DBNames.categories).find({ active: "1" }).toArray()).sort((a, b) => {return parseInt(a.sortin) - parseInt(b.sortin);}) , frecuentes:  await getFormsByCategorieName("AIRE ACONDICIONADO")} })
+
+       
 
         clientSocket.on('disconnect', () => {
             
-            console.log('Client disconnected');
+            console.log('Client home disconnected');
 
         });
 

@@ -18,8 +18,8 @@ class NotifiMyController {
     let firebase_token= req.firebase_token
     let CurrentUserConfig = await UserConfigController.searchOrCreateByUserID(MongoClient,req.userID) 
 
-    console.log(userID)
-    console.log(firebase_token)
+    // console.log(userID)
+    // console.log(firebase_token)
     if(firebase_token == null || userID == null){
       return null
     }
@@ -71,6 +71,7 @@ class NotifiMyController {
   }
 
   static async setNotifyMe(MongoClient, req, res) {
+    
     let session = await SessionsController.getCurrentSession(MongoClient,  req)
     let notifyMe =  await this.searchOrCreateNotifyMeByUserID(MongoClient,{
       firebase_token: session.firebase_token,
@@ -78,8 +79,8 @@ class NotifiMyController {
     })
 
 
-console.log( "notyfyMe")
-console.log( notifyMe)
+  console.log( "notyfyMe")
+  console.log( notifyMe)
   let a = await MongoClient.collection(DBNames.notifyMeOrders).updateOne({ userID: parseInt(session.user.id) }, { $set: {
     notyfyMe: req.body.notyfyMe
   } });

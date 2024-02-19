@@ -13,9 +13,14 @@ class ClientOffersSocket {
 
 
 
-        console.log(this.servicesName);
-        clientSocket.emit(`server:${this.servicesName}:init`, { success: true, code:"",msj:"", initData: {}})
+      
+        console.log("RUN OFERTAS")
+        // console.log(this.servicesName);
+        clientSocket.on(`client:${this.servicesName}:init`, async (data) => {
 
+          clientSocket.emit(`server:${this.servicesName}:init`, { success: true, code:"",msj:"", initData: {}})
+
+        })
         // console.log()
 
         
@@ -37,12 +42,7 @@ class ClientOffersSocket {
         clientSocket.on(`client:${this.servicesName}:acceptOffert`, async (offert) => {
 
 
-            // Desactivar todas las otras ofertas realizadas a ese servicio
-
-
-            //Desactivar las otras ofertas del tecnico seleccionado
-            print("")            
-            
+           
          
         })
 
@@ -62,7 +62,7 @@ class ClientOffersSocket {
     
         clientSocket.on('disconnect', () => {
             
-            console.log('Client disconnected');
+            console.log('client offerta disconnected');
 
         });
 
