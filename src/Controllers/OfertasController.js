@@ -136,8 +136,12 @@ class OfertasController {
               console.log(user);
 
               try {
+                let precioFormateado = this.formatearPrecioCOP(amount.toString());
+
                 
-                await NotificationsController.notificarByUser(MongoClient,FIREBASE_TOKEN, HostBotWhatsApp, TokenWebhook, user, "Fulano de tal", "Fulano quiere hacer tu servicio", "newOffert" );
+                await NotificationsController.notificarByUser(MongoClient,FIREBASE_TOKEN, HostBotWhatsApp, TokenWebhook, user, `Nueva Oferta`, `${session.user.name} quiere realizar tu servicio de *${service.service_title}* por *${precioFormateado} COP*`, "newOffert", {
+                  serviceID: services_id
+                } );
 
               } catch (error) {
                 console.log(error)
@@ -179,6 +183,29 @@ class OfertasController {
         })
       }
     }
+
+
+static formatearPrecioCOP(precioString) {
+  // Convertir el string a un número
+
+  console.log(precioString)
+  const precioNumero = Number(precioString.replace(/[^0-9.-]+/g, ""));
+  
+  // Verificar si el número es válido
+  if (isNaN(precioNumero)) {
+    return 'El valor ingresado no es un número válido';
+  }
+  
+  // Formatear el número como precio en COP
+  const formateador = new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    minimumFractionDigits: 0, // Puedes ajustar el número de decimales según necesites
+  });
+  
+  return formateador.format(precioNumero);
+}
+
 
 
     static async getRoadmap(MongoClient, req, res) {

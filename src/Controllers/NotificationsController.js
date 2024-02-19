@@ -188,7 +188,7 @@ class NotificationsController {
     }
 
 
-    static async notificarByUser(MongoClient,FIREBASE_TOKEN, HostBotWhatsApp, TokenWebhook, currentUser, title, body, tipo = "comun"){
+    static async notificarByUser(MongoClient,FIREBASE_TOKEN, HostBotWhatsApp, TokenWebhook, currentUser, title, body, tipo = "comun", dataNotify = {}){
 
         
         
@@ -213,7 +213,7 @@ class NotificationsController {
                 if(dispositivo.notyfyMe){
                     try {
                         console.log(FIREBASE_TOKEN, dispositivo)
-                        this.sendNotify(MongoClient,FIREBASE_TOKEN, dispositivo.firebase_token, topic, msj, tipo );
+                        this.sendNotify(MongoClient,FIREBASE_TOKEN, dispositivo.firebase_token, topic, msj, tipo, dataNotify );
                     } catch (error) {
                         
                     }
@@ -253,7 +253,7 @@ class NotificationsController {
     // }
 
     
-    static async sendNotify(MongoClient,FIREBASE_TOKEN, fcmToken, title, body, tipo = "comun") {
+    static async sendNotify(MongoClient,FIREBASE_TOKEN, fcmToken, title, body, tipo = "comun", dataNotify = {}) {
 
         console.log(`Enviando notificacion a ${fcmToken}, mensaje: ${title}`)
 
@@ -268,7 +268,7 @@ class NotificationsController {
                 click_action: 'FLUTTER_NOTIFICATION_CLICK',
                 body: body,
                 title: title,
-                data: {},
+                data: dataNotify,
                 tipo: tipo
             },
             to: fcmToken
