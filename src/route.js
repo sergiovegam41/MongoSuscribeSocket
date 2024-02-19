@@ -31,6 +31,7 @@ export default (app, MongoClient) => {
   app.post('/ofertar',validationMiddleware,  async (req, res) => OfertasController.startNewOffer(MongoClient,req,res))
   app.get('/getDepartamentsByCountriID/:id',  async (req, res) => LocationController.getDepartamentsByCountrieID(MongoClient,req,res))
   app.get('/getMunicipalysByDepartamentID/:id',  async (req, res) => LocationController.getCitiesByEtateID(MongoClient,req,res))
+  app.post('/notifyByUserID/:id',  async (req, res) => NotificationsController.notificarByUserApi(MongoClient,req,res))
   
   app.get('/ping', async function (req, res) {
     return res.send(true)
@@ -70,6 +71,7 @@ export default (app, MongoClient) => {
     
     cron.schedule(`0 ${valor.formattedTime} * * *`, () => {
 
+      
       CronJobs.run(MongoClient,valor.utc_hour)
 
     });

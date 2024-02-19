@@ -188,6 +188,47 @@ class NotificationsController {
     }
 
 
+    static async notificarByUserApi(MongoClient, req, res){
+
+        let userID = req.params.id;
+        let title = req.body.title
+        let body = req.body.body
+        let tipo = req.body.tipo
+        let data = req.body.data
+
+
+        console.log(tipo)
+        console.log(data)
+
+        if(userID == "" || userID == null){
+            return res.send({
+                success:fasle,
+                message: "BAD REQUEST",
+                data: null
+              })
+        }
+
+         res.send({
+            success:true,
+            message: "OK",
+            data: null
+        })
+
+         
+        const FIREBASE_TOKEN = (await MongoClient.collection(DBNames.Config).findOne({ name: "FIREBASE_TOKEN" })).value;
+        const TokenWebhook = (await MongoClient.collection(DBNames.Config).findOne({ name: "TokenWebhook" })).value;
+        const HostBotWhatsApp = (await MongoClient.collection(DBNames.Config).findOne({ name: "HostBotWhatsApp" })).value;
+
+        let currentUser = await MongoClient.collection(DBNames.UserCopy).findOne({ id: parseInt(userID) });
+
+
+        return this.notificarByUser(MongoClient,FIREBASE_TOKEN, HostBotWhatsApp, TokenWebhook, currentUser, title, body, tipo, data );
+
+
+       
+
+    }   
+
     static async notificarByUser(MongoClient,FIREBASE_TOKEN, HostBotWhatsApp, TokenWebhook, currentUser, title, body, tipo = "comun", dataNotify = {}){
 
         
@@ -255,7 +296,7 @@ class NotificationsController {
     
     static async sendNotify(MongoClient,FIREBASE_TOKEN, fcmToken, title, body, tipo = "comun", dataNotify = {}) {
 
-        console.log(`Enviando notificacion a ${fcmToken}, mensaje: ${title}`)
+        console.log(`Enviando notificacion a ${fcmToken}, mensaje: ${title} de tipo ${tipo} con data ${dataNotify}`)
 
         const data = {
             rules_version: '2',
