@@ -18,20 +18,21 @@ class ClientOffersSocket {
         // console.log(this.servicesName);
         clientSocket.on(`client:${this.servicesName}:init`, async (data) => {
 
-          clientSocket.emit(`server:${this.servicesName}:init`, { success: true, code:"",msj:"", initData: {}})
+            console.log("el init del ofertas")
+            let services = await getFormsByCategorieName(MongoClient, userData);
+
+            clientSocket.emit(`server:${this.servicesName}:init`, { 
+                success: true, 
+                initData: { 
+                    "services":services
+                }
+            })
 
         })
         // console.log()
 
         
-        let services = await getFormsByCategorieName(MongoClient, userData);
-
-        clientSocket.emit(`server:${this.servicesName}:init`, { 
-            success: true, 
-            initData: { 
-                "services":services
-            }
-        })
+      
 
         clientSocket.on(`client:${this.servicesName}:getOffertsByServicesID`, async (servicesID) => {
             clientSocket.emit(`server:${this.servicesName}:setOffertsByServicesID`, {

@@ -47,6 +47,7 @@ export default (io,MongoClient) => {
           if( !actionsExecuted.includes(data.accion.toString())){
             init = true;
           }
+          
           if(init){
 
             init = false;
