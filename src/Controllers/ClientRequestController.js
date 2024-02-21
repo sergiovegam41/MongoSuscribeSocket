@@ -124,7 +124,7 @@ class ClientRequestController {
         res.send({
           success:true,
           message: "OK",
-          data: null
+          data: service
         })
 
         const formatoCOP = new Intl.NumberFormat('es-CO', {

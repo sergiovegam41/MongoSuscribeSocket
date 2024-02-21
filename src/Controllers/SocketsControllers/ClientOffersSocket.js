@@ -81,6 +81,8 @@ class ClientOffersSocket {
             let offerts = await MongoClient.collection(DBNames.serviceOffers).find({
                 services_id: ObjectId(serviceID),
                 status:1
+            }).sort({
+                _id: -1 
             }).toArray();
         
             let finalData = [];

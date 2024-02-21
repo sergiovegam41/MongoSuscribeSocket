@@ -139,7 +139,7 @@ class OfertasController {
                 let precioFormateado = this.formatearPrecioCOP(amount.toString());
 
                 
-                await NotificationsController.notificarByUser(MongoClient,FIREBASE_TOKEN, HostBotWhatsApp, TokenWebhook, user, `Nueva Oferta`, `${session.user.name} quiere realizar tu servicio de *${service.service_title}* por *${precioFormateado} COP*`, "newOffert", {
+                await NotificationsController.notificarByUser(MongoClient,FIREBASE_TOKEN, HostBotWhatsApp, TokenWebhook, user, `Nueva Oferta`, `${session.user.name} quiere realizar tu servicio de ${service.service_title} por ${precioFormateado} COP`, "newOffert", {
                   serviceID: services_id
                 } );
 
