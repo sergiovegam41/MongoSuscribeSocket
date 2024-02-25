@@ -74,6 +74,14 @@ class ClientOffersSocket {
             }).sort({
                 created_at: -1 
             }).toArray();
+
+           for (const service of services) {
+            if(service.technical_id != null || service.technical_id != ""){
+                service.user = await MongoClient.collection(DBNames.UserCopy).findOne({id:parseInt(service.technical_id)});
+            }
+           }
+
+           console.log(services)
             return services
         }
      
