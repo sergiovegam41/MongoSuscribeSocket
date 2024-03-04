@@ -113,7 +113,7 @@ class TecnicoServicesSocket {
               converted_scheduled_date: {
                 $dateFromString: {
                   dateString: '$scheduled_date',
-                  format: '%Y-%m-%d %H:%M:%S.%L' // Asegúrate de que el formato coincida con tus strings
+                  format: '%Y-%m-%d' // Asegúrate de que el formato coincida con tus strings
                 }
               }
             }
