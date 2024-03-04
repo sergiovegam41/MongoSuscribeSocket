@@ -21,5 +21,4 @@ app.use(cors(corsOptions));
 app.use(express.static(path.join(__dirname,'public')))
 
 
-
 export default app

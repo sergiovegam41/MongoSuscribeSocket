@@ -19,7 +19,15 @@ export class DBNames {
     static scheduled_notifications = "scheduled_notifications";
     static professions_technical_details = "professions_technical_details";
     static UserCopy = "UserCopy";
+    static UserConfig = "UserConfig";
     static sessionTokens = "session_tokens";
+    static forms_professions = "forms_professions";
+    static categories = "categories";
+    static detail_categories = "detail_categories";
+    static anuncios = "anuncios";
+    static serviceOffers = "serviceOffers";
+    static serviceOfferDetails = "serviceOfferDetails";
+    static BackList = "BackList";
     
 } 
 
