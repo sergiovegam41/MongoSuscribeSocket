@@ -41,7 +41,16 @@ export default (io,MongoClient) => {
 
       socket.on("cliente:tryAutch", async (data) => {
 
-        if (await validationMiddleware(data)) {
+        let validationMiddlewareResp = await validationMiddleware(data);
+
+        if(validationMiddlewareResp == null){
+
+          let session = await SessionsController.getCurrentSession(MongoClient, { headers: { authorization: data.token } })
+
+          console.log(`server:${data.accion.toString()}:init`);
+          socket.emit(`server:${data.accion.toString()}:init`, { success: false, code: "banned", msj: session.back_list.reason })
+        
+        } else if (validationMiddlewareResp == true) {
           console.log("Next");
 
           if( !actionsExecuted.includes(data.accion.toString())){
@@ -70,8 +79,15 @@ export default (io,MongoClient) => {
     })
 
     async function validationMiddleware(data) {
-    let session = await SessionsController.getCurrentSession(MongoClient, { headers: { authorization: data.token } })
+
+      let session = await SessionsController.getCurrentSession(MongoClient, { headers: { authorization: data.token } })
   
+      if(session.back_list){
+        
+        console.log("USUARIO EN BLACK LIST")
+        return null;
+      }
+
       if (session) {
   
         return true

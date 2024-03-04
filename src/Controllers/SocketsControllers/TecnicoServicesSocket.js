@@ -101,21 +101,39 @@ class TecnicoServicesSocket {
           ]
         }
 
-        // console.log(data.professionIds)
+        let today = new Date();
+        today.setHours(0, 0, 0, 0);
 
-        let resp = await MongoClient.collection(DBNames.services).find({
-          municipality_id: municipaly_id,
-          deleted_at: {
-            $exists: false
+        let twoDaysAgo = new Date(today);
+        twoDaysAgo.setDate(today.getDate() - 2);
+
+        let resp = await MongoClient.collection(DBNames.services).aggregate([
+          {
+            $addFields: {
+              converted_scheduled_date: {
+                $dateFromString: {
+                  dateString: '$scheduled_date',
+                  format: '%Y-%m-%d %H:%M:%S.%L' // Asegúrate de que el formato coincida con tus strings
+                }
+              }
+            }
           },
-          profession_id: {
-            $in: data.professionIds
+          {
+            $match: {
+              municipality_id: municipaly_id,
+              deleted_at: { $exists: false },
+              profession_id: { $in: data.professionIds },
+              status: "CREATED",
+              is_public: true,
+              converted_scheduled_date: { $gte: twoDaysAgo }
+            }
           },
-          status: "CREATED",
-          is_public: true
-        }).sort({
-          created_at: -1
-        }).skip(skip).limit(limit).toArray();
+          { $sort: { created_at: -1 } },
+          { $skip: skip },
+          { $limit: limit }
+        ]).toArray();
+
+                
         return resp
       } catch (error) {
         console.log(error)

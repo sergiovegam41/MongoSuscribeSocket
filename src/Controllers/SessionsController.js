@@ -15,12 +15,15 @@ class SessionsController{
                     ...session,
                     user: await MongoClient.collection(DBNames.UserCopy).findOne({ id: session.user_id }),
                     location: await MongoClient.collection(DBNames.technical_workplace).findOne({ user_id: session.user_id }),
+                    back_list: await MongoClient.collection(DBNames.BackList).findOne({ userID: parseInt(session.user_id )}),
                 }
             }
             return {
                 ...session,
                 user: null,
                 location: null,
+                back_list: null
+
             }
         }
 
