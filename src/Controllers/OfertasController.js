@@ -128,7 +128,7 @@ class OfertasController {
               console.log("NOTIFICANDO...");
               console.log(service.client_id);
 
-
+              let user = await MongoClient.collection(DBNames.UserCopy).findOne({ id: parseInt( service.client_id ) });
               console.log(user);
 
               try {
