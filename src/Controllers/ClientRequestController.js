@@ -134,7 +134,7 @@ class ClientRequestController {
         const cantidadFormateada = formatoCOP.format(priceService);
 
 
-        await NotificationsController.sendNotifyManyByFilterV2(MongoClient,[session.location.municipality_id],[form.professions_id],`Nuevo servicio ${parseInt(priceService)>0?"~ "+cantidadFormateada: ""}`, `Hola $[user_name];, tenemos un Nuevo servicio disponible para ti ${main_address.value.district != ""?"en "+main_address.value.district:""}`, "TECNICO","new_services")
+        await NotificationsController.sendNotifyManyByFilterV2(MongoClient,req,[session.location.municipality_id],[form.professions_id],`Nuevo servicio ${parseInt(priceService)>0?"~ "+cantidadFormateada: ""}`, `Hola $[user_name];, tenemos un Nuevo servicio disponible para ti ${main_address.value.district != ""?"en "+main_address.value.district:""}`, "TECNICO","new_services")
 
 
 

@@ -13,6 +13,7 @@ import multer from 'multer';
 const upload = multer({ dest: 'uploads/' });
 import NotifiMyController from './Controllers/NotifiMyController.js';
 import OfertasController from './Controllers/OfertasController.js';
+import UserConfigController from './Controllers/UserConfigController.js';
 
 export default (app, MongoClient) => {
 
@@ -25,6 +26,7 @@ export default (app, MongoClient) => {
   app.post('/createSheduledNotification',validationMiddleware,  async (req, res) => ProfessionsController.createSheduledNotification(MongoClient,req,res))
   app.post('/updateSheduledNotification/:id',validationMiddleware,  async (req, res) => ProfessionsController.updateSheduledNotification(MongoClient,req,res))
   app.post('/sendNotifyMany',validationMiddleware,  async (req, res) => NotificationsController.sendNotifyMany(MongoClient,req,res))
+  app.post('/sendNotifyToManyV2',validationMiddleware,  async (req, res) => NotificationsController.sendNotifyToManyV2(MongoClient,req,res))
   app.post('/getNotifyMe',validationMiddleware,  async (req, res) => NotifiMyController.getNotifyMe(MongoClient,req,res))
   app.post('/setNotifyMe',validationMiddleware,  async (req, res) => NotifiMyController.setNotifyMe(MongoClient,req,res))
   app.get('/getRoadmap',validationMiddleware,  async (req, res) => OfertasController.getRoadmap(MongoClient,req,res))
@@ -32,7 +34,9 @@ export default (app, MongoClient) => {
   app.get('/getDepartamentsByCountriID/:id',  async (req, res) => LocationController.getDepartamentsByCountrieID(MongoClient,req,res))
   app.get('/getMunicipalysByDepartamentID/:id',  async (req, res) => LocationController.getCitiesByEtateID(MongoClient,req,res))
   app.post('/notifyByUserID/:id',  validationMiddleware ,async (req, res) => NotificationsController.notificarByUserApi(MongoClient,req,res))
+  // app.post('/searchOrCreateGlobalUserConfigByUserID',validationMiddleware,  async (req, res) => UserConfigController.searchOrCreateByUserIDApi(MongoClient,req,res))
   
+
   app.get('/ping', async function (req, res) {
     return res.send(true)
   })

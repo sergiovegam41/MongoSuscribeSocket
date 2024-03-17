@@ -4,6 +4,25 @@ import { ServerApiVersion, ObjectId } from 'mongodb';
 
 class UserConfigController {
 
+  static async searchOrCreateByUserIDApi(MongoClient, req,res){
+
+    try {
+     res.send({
+       success: true,
+       message: "OK",
+       data: await this.searchOrCreateByUserID(MongoClient, req.body.userID)
+     })
+    } catch (error) {
+     res.send({
+       success: false,
+       message: "ERROR: "+error,
+       data: null
+     })
+    }
+ 
+    return
+     
+   }
 
   static async searchOrCreateByUserID(MongoClient, userID){
 
