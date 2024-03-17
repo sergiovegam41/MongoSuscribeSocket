@@ -257,13 +257,13 @@ static formatearPrecioCOP(precioString) {
     static async getRoadmapByTechnicalID(MongoClient, technicalID ) {
 
       technicalID = technicalID.toString()
-      const twoWeeksAgo = new Date();
-      twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
       // let service = await MongoClient.collection(DBNames.services).find({technical_id:  technicalID, status: ServiceModel.ASSIGNED}).toArray()
+      const twoWeeksAgo = moment().subtract(2, 'weeks').format('YYYY-MM-DD');
+
       let service = await MongoClient.collection(DBNames.services).find({
         technical_id: technicalID,
         status: ServiceModel.ASSIGNED,
-        scheduled_date: { $lt: twoWeeksAgo } // Usa $lt para encontrar fechas menores que "twoWeeksAgo"
+        scheduled_date: { $gte: twoWeeksAgo }
       }).toArray()
 
       console.log(service)
