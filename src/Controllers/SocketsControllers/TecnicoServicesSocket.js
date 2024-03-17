@@ -56,11 +56,13 @@ class TecnicoServicesSocket {
       let briefcase = await searchBriefcasesrsByUserID(userData.session.user_id)
 
       clientSocket.emit(`server:${this.servicesName}:setData`, {
+
         orders: resp,
         notifiMeOrders: notifyMe.notyfyMe,
         starts: starts,
         briefcase: briefcase,
         technical_workplace
+        
       })
 
     })
@@ -70,10 +72,6 @@ class TecnicoServicesSocket {
       console.log('client Tecnico disconnected');
 
     });
-
-
-
-
 
     async function searchOrTechnicalWorkplaceUserID(userID) {
       return await WorkplaceController.searchOrTechnicalWorkplaceUserID(MongoClient, {
@@ -113,7 +111,7 @@ class TecnicoServicesSocket {
               converted_scheduled_date: {
                 $dateFromString: {
                   dateString: '$scheduled_date',
-                  format: '%Y-%m-%d' // Asegúrate de que el formato coincida con tus strings
+                  format: '%Y-%m-%d' 
                 }
               }
             }

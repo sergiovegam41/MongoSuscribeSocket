@@ -115,7 +115,6 @@ class OfertasController {
                 }
               );
               
-              
               res.send({
                 
                 success:true,
@@ -129,13 +128,12 @@ class OfertasController {
               console.log(service.client_id);
 
               let user = await MongoClient.collection(DBNames.UserCopy).findOne({ id: parseInt( service.client_id ) });
-              console.log(user);
+              // console.log(user);
 
               try {
+
                 let precioFormateado = this.formatearPrecioCOP(amount.toString());
 
-                
-            
                 await NotificationsController.notificarByUserApi(MongoClient, {
 
                   headers:{
@@ -259,10 +257,16 @@ static formatearPrecioCOP(precioString) {
     static async getRoadmapByTechnicalID(MongoClient, technicalID ) {
 
       technicalID = technicalID.toString()
+      const twoWeeksAgo = new Date();
+      twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+      // let service = await MongoClient.collection(DBNames.services).find({technical_id:  technicalID, status: ServiceModel.ASSIGNED}).toArray()
+      let service = await MongoClient.collection(DBNames.services).find({
+        technical_id: technicalID,
+        status: ServiceModel.ASSIGNED,
+        scheduled_date: { $lt: twoWeeksAgo } // Usa $lt para encontrar fechas menores que "twoWeeksAgo"
+      }).toArray()
 
-      let service = await MongoClient.collection(DBNames.services).find({technical_id:  technicalID, status: ServiceModel.ASSIGNED}).toArray()
-
-       console.log(service)
+      console.log(service)
 
       return this.organizeDataByDate(service);
 
