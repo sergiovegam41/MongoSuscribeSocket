@@ -8,6 +8,7 @@ import fs from 'fs';
 import ServiceModel from '../Models/ServicesModel.js';
 import NotificationsController from './NotificationsController.js';
 import { unlink } from 'fs/promises';
+import moment from "moment";
 
 class ClientRequestController {
 
@@ -93,8 +94,13 @@ class ClientRequestController {
 
       console.log(form.base_price)
       console.log(priceService)
+
+      // let fecha = datetime.strptime(, "%Y-%m-%d")
+      var fecha = moment(main_date_time.value.date);
+
+
         let servicio = {
-          "scheduled_date": main_date_time.value.date,
+          "scheduled_date": fecha.format("YYYY-MM-DD").toString(),
           "scheduled_time": main_date_time.value.time,
           "payment_method": payment_method.value,
           "client_id": `${session.user_id}`,

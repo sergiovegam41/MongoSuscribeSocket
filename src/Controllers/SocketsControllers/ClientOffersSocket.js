@@ -10,9 +10,6 @@ class ClientOffersSocket {
     static servicesName = "ClientOffersSocket"
 
     static async run(io,clientSocket, MongoClient, userData){
-
-
-
       
         console.log("RUN OFERTAS")
         // console.log(this.servicesName);
@@ -31,9 +28,6 @@ class ClientOffersSocket {
         })
         // console.log()
 
-        
-      
-
         clientSocket.on(`client:${this.servicesName}:getOffertsByServicesID`, async (servicesID) => {
             clientSocket.emit(`server:${this.servicesName}:setOffertsByServicesID`, {
                 "offerts": await getOffertsByServiceID(MongoClient,servicesID)
@@ -41,8 +35,6 @@ class ClientOffersSocket {
         })
       
         clientSocket.on(`client:${this.servicesName}:acceptOffert`, async (offert) => {
-
-
            
          
         })
@@ -67,23 +59,42 @@ class ClientOffersSocket {
 
         });
 
-        async function getFormsByCategorieName(MongoClient,userData ){
-            let services = await MongoClient.collection(DBNames.services).find({
-                client_id: userData.session.user_id.toString(),
-                status: { $in: ["CREATED", "ASSIGNED"] }
-            }).sort({
-                created_at: -1 
-            }).toArray();
-
-           for (const service of services) {
-            if(service.technical_id != null || service.technical_id != ""){
-                service.user = await MongoClient.collection(DBNames.UserCopy).findOne({id:parseInt(service.technical_id)});
-            }
-           }
-
-           console.log(services)
-            return services
+        async function getFormsByCategorieName(MongoClient, userData) {
+            const services = await MongoClient.collection(DBNames.services).aggregate([
+                {
+                    $match: {
+                        client_id: userData.session.user_id.toString(),
+                        status: { $in: ["CREATED", "ASSIGNED"] },
+                        technical_id: { $ne: null, $ne: "" } // Asegúrate de que technical_id no sea null ni cadena vacía
+                    }
+                },
+                {
+                    $sort: {
+                        created_at: -1
+                    }
+                },
+                {
+                    $lookup: {
+                        from: DBNames.UserCopy, // Asume que 'UserCopy' es el nombre de la colección correcta
+                        localField: "technical_id", // Campo en la colección de servicios
+                        foreignField: "id", // Asume que 'id' es el campo en UserCopy que corresponde a technical_id
+                        as: "user_info" // El resultado de la unión se almacena en este campo del documento
+                    }
+                },
+                {
+                    $set: {
+                        user: { $arrayElemAt: ["$user_info", 0] } // Extrae el primer usuario de la lista (si existe)
+                    }
+                },
+                {
+                    $unset: "user_info" // Opcional: elimina el campo user_info para limpiar el documento
+                }
+            ]).toArray();
+        
+            console.log(services);
+            return services;
         }
+        
      
         async function getOffertsByServiceID(MongoClient, serviceID) {
             let offerts = await MongoClient.collection(DBNames.serviceOffers).find({

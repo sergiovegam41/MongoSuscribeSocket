@@ -6,11 +6,9 @@ import sockets from './sockets.js';
 import routes from './route.js';
 import { PORT,MONGODB_NAME } from './config.js';
 
-(async ()=>{
+( async ()=>{
     
-
     await connectDB(function(Mongoclient){
-
 
         var MongoClient = Mongoclient.db(MONGODB_NAME);
         console.log( "mongodb connect to " + MONGODB_NAME )
@@ -34,5 +32,5 @@ import { PORT,MONGODB_NAME } from './config.js';
 
     })
 
-})();
+} )();
 
