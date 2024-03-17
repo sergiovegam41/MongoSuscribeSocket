@@ -138,6 +138,11 @@ class OfertasController {
             
                 await NotificationsController.notificarByUserApi(MongoClient, {
 
+                  req:{
+                    headers:{
+                      authorization: session.session_token
+                    }
+                  },
                   params:{
                     id: service.client_id,
                   },
