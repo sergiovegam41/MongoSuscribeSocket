@@ -124,14 +124,10 @@ class OfertasController {
                 
               })
 
-              const FIREBASE_TOKEN = (await MongoClient.collection(DBNames.Config).findOne({ name: "FIREBASE_TOKEN" })).value;
-              const TokenWebhook = (await MongoClient.collection(DBNames.Config).findOne({ name: "TokenWebhook" })).value;
-              const HostBotWhatsApp = (await MongoClient.collection(DBNames.Config).findOne({ name: "HostBotWhatsApp" })).value;
-
+           
               console.log("NOTIFICANDO...");
               console.log(service.client_id);
 
-              let user = await MongoClient.collection(DBNames.UserCopy).findOne({ id: parseInt( service.client_id ) });
 
               console.log(user);
 
@@ -139,9 +135,23 @@ class OfertasController {
                 let precioFormateado = this.formatearPrecioCOP(amount.toString());
 
                 
-                await NotificationsController.notificarByUser(MongoClient,FIREBASE_TOKEN, HostBotWhatsApp, TokenWebhook, user, `Nueva Oferta`, `${session.user.name} quiere realizar tu servicio de ${service.service_title} por ${precioFormateado} COP`, "newOffert", {
-                  serviceID: services_id
-                } );
+            
+                await NotificationsController.notificarByUserApi(MongoClient, {
+
+                  params:{
+                    id: service.client_id,
+                  },
+                  body: {
+                    title: `Nueva Oferta`,
+                    body: `${session.user.name} quiere realizar tu servicio de ${service.service_title} por ${precioFormateado} COP`, 
+                    tipo: "newOffert",
+                    data: {
+                      serviceID: services_id
+                    } 
+                  }
+                  
+
+                }, null);
 
               } catch (error) {
                 console.log(error)

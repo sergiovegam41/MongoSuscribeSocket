@@ -117,7 +117,10 @@ class NotificationsController {
 
     }
 
-   
+    // static async notificarByUser(MongoClient,FIREBASE_TOKEN, HostBotWhatsApp, TokenWebhook, currentUser, title, body, tipo = "comun", dataNotify = {}){
+    
+    // }
+
 
 
     static async notificarByUserApi(MongoClient, req, res){
@@ -130,21 +133,24 @@ class NotificationsController {
         
         
         
-        // console.log(data)
-        
-        if(userID == "" || userID == null){
-            return res.send({
-                success:fasle,
-                message: "BAD REQUEST",
+        if( res != null){
+
+            if(userID == "" || userID == null){
+                return res.send({
+                    success:fasle,
+                    message: "BAD REQUEST",
+                    data: null
+                })
+            }
+
+            res.send({
+                success:true,
+                message: "OK",
                 data: null
             })
+
         }
         
-        res.send({
-            success:true,
-            message: "OK",
-            data: null
-        })
         
         let session = await SessionsController.getCurrentSession(MongoClient, req)
 
