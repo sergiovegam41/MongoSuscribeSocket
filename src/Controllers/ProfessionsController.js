@@ -20,6 +20,7 @@ class ProfessionsController {
   static async createSheduledNotification(MongoClient, req, res) {
 
     try {
+      console.log(req.body)
 
       await MongoClient.collection(DBNames.scheduled_notifications).insertOne({
         title: req.body.title,
@@ -54,6 +55,7 @@ class ProfessionsController {
 
       var id = req.params.id;
 
+      console.log(req.body)
       await MongoClient.collection(DBNames.scheduled_notifications).updateOne({ _id: ObjectId(id) },
         {
           $set: {
