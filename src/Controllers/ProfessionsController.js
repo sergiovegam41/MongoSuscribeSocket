@@ -31,6 +31,7 @@ class ProfessionsController {
         hour: parseInt(req.body.hour),
         country_id: req.body.country_id,
         date: req.body.date.replaceAll('-', '/'),
+        role: req.body.role,
       });
 
       return res.send({
@@ -65,6 +66,7 @@ class ProfessionsController {
             hour: parseInt(req.body.hour),
             country_id: req.body.country_id,
             date: req.body.date.replaceAll('-', '/'),
+            role: req.body.role,
           }
         }
       );
