@@ -20,6 +20,7 @@ class ProfessionsController {
   static async createSheduledNotification(MongoClient, req, res) {
 
     try {
+      console.log(req.body)
 
       await MongoClient.collection(DBNames.scheduled_notifications).insertOne({
         title: req.body.title,
@@ -31,6 +32,7 @@ class ProfessionsController {
         hour: parseInt(req.body.hour),
         country_id: req.body.country_id,
         date: req.body.date.replaceAll('-', '/'),
+        role: req.body.role,
       });
 
       return res.send({
@@ -53,6 +55,7 @@ class ProfessionsController {
 
       var id = req.params.id;
 
+      console.log(req.body)
       await MongoClient.collection(DBNames.scheduled_notifications).updateOne({ _id: ObjectId(id) },
         {
           $set: {
@@ -65,6 +68,7 @@ class ProfessionsController {
             hour: parseInt(req.body.hour),
             country_id: req.body.country_id,
             date: req.body.date.replaceAll('-', '/'),
+            role: req.body.role,
           }
         }
       );
