@@ -38,7 +38,7 @@ export default (app, MongoClient) => {
   
 
   app.get('/ping', async function (req, res) {
-    return res.send(true)
+    return res.send("listo")
   })
 
   async function validationMiddleware(req, res, next) {
