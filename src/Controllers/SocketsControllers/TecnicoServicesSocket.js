@@ -109,13 +109,13 @@ class TecnicoServicesSocket {
           {
             $addFields: {
               converted_scheduled_date: {
-                $dateFromString: {
-                  dateString: '$scheduled_date',
-                  format: '%Y-%m-%d' 
+                  $dateFromString: {
+                    dateString: '$created_at',
+                    format: '%Y-%m-%d' 
+                  }
                 }
               }
-            }
-          },
+            },
           {
             $match: {
               municipality_id: municipaly_id,
