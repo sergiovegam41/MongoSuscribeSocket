@@ -103,7 +103,7 @@ class TecnicoServicesSocket {
         today.setHours(0, 0, 0, 0);
 
         let twoDaysAgo = new Date(today);
-        twoDaysAgo.setDate(today.getDate() - 2);
+        // twoDaysAgo.setDate(today.getDate() - 2);
 
         let resp = await MongoClient.collection(DBNames.services).aggregate([
           {
