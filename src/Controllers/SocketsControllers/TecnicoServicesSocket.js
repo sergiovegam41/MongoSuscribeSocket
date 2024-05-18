@@ -102,7 +102,7 @@ class TecnicoServicesSocket {
         let today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        // let twoDaysAgo = new Date(today);
+        let twoDaysAgo = new Date(today);
         // twoDaysAgo.setDate(today.getDate() - 2);
 
         let resp = await MongoClient.collection(DBNames.services).aggregate([
@@ -113,7 +113,7 @@ class TecnicoServicesSocket {
               profession_id: { $in: data.professionIds },
               status: "CREATED",
               is_public: true,
-              created_at: { $gte: today, $lt: new Date(today.getTime() + 86400000) } // Filter for today's date
+              created_at: { $gte: twoDaysAgo }
             }
           },
           { $sort: { created_at: -1 } },
