@@ -105,7 +105,18 @@ class TecnicoServicesSocket {
         let twoDaysAgo = new Date(today);
         // twoDaysAgo.setDate(today.getDate() - 2);
 
+        
         let resp = await MongoClient.collection(DBNames.services).aggregate([
+          {
+            $addFields: {
+              converted_scheduled_date: {
+                $dateFromString: {
+                  dateString: '$created_at',
+                  format: '%Y-%m-%d' 
+                }
+              }
+            }
+          },
           {
             $match: {
               municipality_id: municipaly_id,
@@ -113,38 +124,13 @@ class TecnicoServicesSocket {
               profession_id: { $in: data.professionIds },
               status: "CREATED",
               is_public: true,
-              created_at: { $gte: twoDaysAgo }
+              converted_scheduled_date: { $gte: twoDaysAgo }
             }
           },
           { $sort: { created_at: -1 } },
           { $skip: skip },
           { $limit: limit }
         ]).toArray();
-        // let resp = await MongoClient.collection(DBNames.services).aggregate([
-        //   {
-        //     $addFields: {
-        //       converted_scheduled_date: {
-        //         $dateFromString: {
-        //           dateString: '$scheduled_date',
-        //           format: '%Y-%m-%d' 
-        //         }
-        //       }
-        //     }
-        //   },
-        //   {
-        //     $match: {
-        //       municipality_id: municipaly_id,
-        //       deleted_at: { $exists: false },
-        //       profession_id: { $in: data.professionIds },
-        //       status: "CREATED",
-        //       is_public: true,
-        //       converted_scheduled_date: { $gte: twoDaysAgo }
-        //     }
-        //   },
-        //   { $sort: { created_at: -1 } },
-        //   { $skip: skip },
-        //   { $limit: limit }
-        // ]).toArray();
 
                 
         return resp
