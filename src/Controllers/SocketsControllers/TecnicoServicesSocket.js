@@ -102,20 +102,10 @@ class TecnicoServicesSocket {
         let today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        let twoDaysAgo = new Date(today);
+        // let twoDaysAgo = new Date(today);
         // twoDaysAgo.setDate(today.getDate() - 2);
 
         let resp = await MongoClient.collection(DBNames.services).aggregate([
-          {
-            $addFields: {
-              converted_scheduled_date: {
-                $dateFromString: {
-                  dateString: '$scheduled_date',
-                  format: '%Y-%m-%d' 
-                }
-              }
-            }
-          },
           {
             $match: {
               municipality_id: municipaly_id,
@@ -123,13 +113,38 @@ class TecnicoServicesSocket {
               profession_id: { $in: data.professionIds },
               status: "CREATED",
               is_public: true,
-              converted_scheduled_date: { $gte: twoDaysAgo }
+              created_at: { $gte: today, $lt: new Date(today.getTime() + 86400000) } // Filter for today's date
             }
           },
           { $sort: { created_at: -1 } },
           { $skip: skip },
           { $limit: limit }
         ]).toArray();
+        // let resp = await MongoClient.collection(DBNames.services).aggregate([
+        //   {
+        //     $addFields: {
+        //       converted_scheduled_date: {
+        //         $dateFromString: {
+        //           dateString: '$scheduled_date',
+        //           format: '%Y-%m-%d' 
+        //         }
+        //       }
+        //     }
+        //   },
+        //   {
+        //     $match: {
+        //       municipality_id: municipaly_id,
+        //       deleted_at: { $exists: false },
+        //       profession_id: { $in: data.professionIds },
+        //       status: "CREATED",
+        //       is_public: true,
+        //       converted_scheduled_date: { $gte: twoDaysAgo }
+        //     }
+        //   },
+        //   { $sort: { created_at: -1 } },
+        //   { $skip: skip },
+        //   { $limit: limit }
+        // ]).toArray();
 
                 
         return resp
