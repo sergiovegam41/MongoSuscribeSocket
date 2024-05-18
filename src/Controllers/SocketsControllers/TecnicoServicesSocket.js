@@ -7,7 +7,6 @@ import {
 } from 'mongodb';
 import WorkplaceController from "../WorkplaceController.js";
 import NotifiMyController from "../NotifiMyController.js";
-import moment from 'moment';
 
 
 class TecnicoServicesSocket {
@@ -100,23 +99,27 @@ class TecnicoServicesSocket {
           ]
         }
 
-        const startOfDay = moment().startOf('day').toDate(); // Inicio del día actual
-        const endOfDay = moment().endOf('day').toDate(); // Fin del día actual
+        let today = new Date();
+        today.setHours(0, 0, 0, 0);
 
-        const resp = await MongoClient.collection(DBNames.services).aggregate([
-            {
-                $match: {
-                    municipality_id: municipaly_id,
-                    deleted_at: { $exists: false },
-                    profession_id: { $in: data.professionIds },
-                    status: "CREATED",
-                    is_public: true,
-                    created_at: { $gte: startOfDay, $lte: endOfDay } // Añadido para filtrar solo los de hoy
-                }
-            },
-            { $sort: { created_at: -1 } },
-            { $skip: skip },
-            { $limit: limit }
+        let twoDaysAgo = new Date(today);
+        // twoDaysAgo.setDate(today.getDate() - 2);
+
+        let resp = await MongoClient.collection(DBNames.services).aggregate([
+       
+          {
+            $match: {
+              municipality_id: municipaly_id,
+              deleted_at: { $exists: false },
+              profession_id: { $in: data.professionIds },
+              status: "CREATED",
+              is_public: true,
+              created_at: { $gte: twoDaysAgo }
+            }
+          },
+          { $sort: { created_at: -1 } },
+          { $skip: skip },
+          { $limit: limit }
         ]).toArray();
 
                 
