@@ -103,10 +103,19 @@ class TecnicoServicesSocket {
         today.setHours(0, 0, 0, 0);
 
         let twoDaysAgo = new Date(today);
-        // twoDaysAgo.setDate(today.getDate() - 2);
+        // twoDaysAgo.zsetDate(today.getDate() - 2);
 
         let resp = await MongoClient.collection(DBNames.services).aggregate([
-       
+          {
+            $addFields: {
+              converted_scheduled_date: {
+                $dateFromString: {
+                  dateString: '$scheduled_date',
+                  format: '%Y-%m-%d' 
+                }
+              }
+            }
+          },
           {
             $match: {
               municipality_id: municipaly_id,
@@ -114,7 +123,7 @@ class TecnicoServicesSocket {
               profession_id: { $in: data.professionIds },
               status: "CREATED",
               is_public: true,
-              created_at: { $gte: twoDaysAgo }
+              converted_scheduled_date: { $gte: twoDaysAgo }
             }
           },
           { $sort: { created_at: -1 } },
