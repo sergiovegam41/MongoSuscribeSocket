@@ -1,10 +1,5 @@
 import http from 'axios';
 import { DBNames } from './../db.js';
-import moment from "moment";
-import ReplaceableWordsController from '../Utils/ReplaceableWordsController.js';
-import nodemailer from "nodemailer";
-
-import { ObjectId } from 'mongodb';
 import SessionsController from './SessionsController.js';
 
 class NotificationsController {
