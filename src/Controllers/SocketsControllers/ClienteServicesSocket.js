@@ -1,78 +1,157 @@
-
-import { DBNames } from "../../db.js";
-import { ObjectID } from 'mongodb';
-import { ServerApiVersion, ObjectId } from 'mongodb';
+import {DBNames} from "../../db.js";
+import {ObjectID} from 'mongodb';
+import {ServerApiVersion, ObjectId} from 'mongodb';
 import NotifiMyController from "../NotifiMyController.js";
+import StartsController from "../StartsController.js";
 
 
 class ClienteServicesSocket {
 
     static servicesName = "clienteServices"
 
-    static async run(io,clientSocket, MongoClient, userData){   
-
+    static async run(io, clientSocket, MongoClient, userData) {
         // console.log(userData);
         try {
-            
-        NotifiMyController.searchOrCreateNotifyMeByUserID(MongoClient, {userID:userData.session.user_id,firebase_token:userData.session.firebase_token})
 
-        
-        console.log("RUN HOME CLIENTE")
-        // console.log(this.servicesName);
-        clientSocket.on(`client:${this.servicesName}:init`, async (data) => {
+            NotifiMyController.searchOrCreateNotifyMeByUserID(MongoClient, {
+                userID: userData.session.user_id,
+                firebase_token: userData.session.firebase_token
+            })
 
-            console.log("el init de cliente home")
 
-          clientSocket.emit(`server:${this.servicesName}:init`, { success: true, code:"",msj:"", initData: { categories: (await MongoClient.collection(DBNames.categories).find({ active: "1" }).toArray()).sort((a, b) => {return parseInt(a.sortin) - parseInt(b.sortin);}) , frecuentes:  await getFormsByCategorieName("AIRE ACONDICIONADO")} })
+            console.log("RUN HOME CLIENTE")
+            // console.log(this.servicesName);
+            clientSocket.on(`client:${this.servicesName}:init`, async (data) => {
 
-        })
-      
-        clientSocket.on(`client:${this.servicesName}:search`, async (searchTerm) => {
-            try {
+                console.log("el init de cliente home")
 
-                if(searchTerm == ""){
-                    clientSocket.emit(`server:${this.servicesName}:searchResults`, null);
-                    return;
+                clientSocket.on(`client:${this.servicesName}:rateService`, async (req) => {
+                    console.log("RATE SERVICE")
+                     await StartsController.rate(MongoClient, req, clientSocket)
+
+                })
+
+                clientSocket.emit(`server:${this.servicesName}:init`, {
+                    success: true,
+                    code: "",
+                    msj: "",
+                    initData: {
+                        categories: (await MongoClient.collection(DBNames.categories).find({active: "1"}).toArray()).sort((a, b) => {
+                            return parseInt(a.sortin) - parseInt(b.sortin);
+                        }),
+                        frecuentes: await getFormsByCategorieName("AIRE ACONDICIONADO"),
+                        unrated_service: await getUnratedService(userData),
+                    }
+                })
+
+            })
+
+            clientSocket.on(`client:${this.servicesName}:search`, async (searchTerm) => {
+                try {
+
+                    if (searchTerm == "") {
+                        clientSocket.emit(`server:${this.servicesName}:searchResults`, null);
+                        return;
+                    }
+
+                    let fuzzyRegex = createFuzzyRegex(searchTerm);
+                    let searchQuery = {name: {$regex: fuzzyRegex}};
+
+                    let results = await MongoClient.collection(DBNames.forms_professions).find(searchQuery).toArray();
+                    console.log(results)
+                    clientSocket.emit(`server:${this.servicesName}:searchResults`, results);
+                } catch (error) {
+                    console.error('Error during search:', error);
                 }
-                
-                let fuzzyRegex = createFuzzyRegex(searchTerm);
-                let searchQuery = { name: { $regex: fuzzyRegex } };
+            });
 
-                let results = await  MongoClient.collection(DBNames.forms_professions).find(searchQuery).toArray();
-                console.log(results)
-                clientSocket.emit(`server:${this.servicesName}:searchResults`, results);
-            } catch (error) {
-                console.error('Error during search:', error);
+            clientSocket.on(`client:${this.servicesName}:getFormsByCategorieName`, async (categorieName) => {
+                clientSocket.emit(`server:${this.servicesName}:setFormsByCategorieName`, await getFormsByCategorieName(categorieName));
+            })
+
+
+
+            clientSocket.on('disconnect', () => {
+
+                console.log('Client home disconnected');
+
+            });
+
+            async function getFormsByCategorieName(name) {
+                const {_id: frecuentesId} = await MongoClient.collection(DBNames.categories).findOne({name: name});
+                const detailCategories = await MongoClient.collection(DBNames.detail_categories).find({categories_id: frecuentesId.toString()}).toArray();
+                const frecuentes = (await Promise.all(detailCategories.map(async ({professions_id}) =>
+                    MongoClient.collection(DBNames.forms_professions).find({professions_id: professions_id.toString()}).toArray()
+                ))).flat();
+                return frecuentes
             }
-        });
 
-        clientSocket.on(`client:${this.servicesName}:getFormsByCategorieName`, async (categorieName) => {
-            clientSocket.emit(`server:${this.servicesName}:setFormsByCategorieName`, await getFormsByCategorieName(categorieName));
-        })
+            async function getUnratedService(client) {
 
+                const pipeline = [
+                    {
+                        $match: {
+                            client_id: client.session.user_id.toString(),
+                            status: "FINISHED"
+                        }
+                    },
+                    {
+                        $addFields: {
+                            service_id_string: {$toString: "$_id"}
+                        }
+                    },
+                    {
+                        $lookup: {
+                            from: "technical_stars_services_detail",
+                            localField: "service_id_string",
+                            foreignField: "service_id",
+                            as: "detalles"
+                        }
+                    },
+                    {
+                        $match: {
+                            detalles: {$eq: []}
+                        }
+                    },
+                    {
+                        $sort: {_id: -1}
+                    },
+                    {
+                        $limit: 1
+                    },
+                    {
+                        $project: {
+                            _id: 0,
+                            last_service_id_no_rating: {
+                                $toString: "$_id"
+                            },
+                            service_title: 1,
+                            scheduled_date: 1
+                        }
+                    }
+                ];
 
-       
+                const result = await MongoClient.collection(DBNames.services).aggregate(pipeline).toArray();
+                if (result.length > 0) {
+                    console.log(client);
+                    return {
+                        last_service_id_no_rating: result[0].last_service_id_no_rating,
+                        name: client.session.user.name,
+                        last_name: client.session.user.last_name,
+                        photo_profile: client.session.user.photo_profile,
+                        scheduled_date: result[0].scheduled_date,
+                        service_title: result[0].service_title
 
-        clientSocket.on('disconnect', () => {
-            
-            console.log('Client home disconnected');
-
-        });
-
-        async function getFormsByCategorieName(name){
-            const { _id: frecuentesId } = await MongoClient.collection(DBNames.categories).findOne({ name: name });
-            const detailCategories = await MongoClient.collection(DBNames.detail_categories).find({ categories_id: frecuentesId.toString() }).toArray();
-            const frecuentes = (await Promise.all(detailCategories.map(async ({ professions_id }) => 
-                MongoClient.collection(DBNames.forms_professions).find({ professions_id: professions_id.toString() }).toArray()
-            ))).flat();
-            return frecuentes
-        }
+                    };
+                }
+                return null;
+            }
         } catch (error) {
             console.log("[ERROR EN ClienteServicesSocket.clienteServices]")
             console.log(userData)
             console.log(error)
         }
-    }   
+    }
 
 }
 
