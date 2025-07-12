@@ -1,7 +1,7 @@
 import app  from './app.js';
 import { Server as WebSocketServer } from 'socket.io';
 import http from 'http';
-import { connectDB } from './db.js';
+import {connectDB} from './db.js';
 import sockets from './sockets.js';
 import routes from './route.js';
 import { PORT,MONGODB_NAME } from './config.js';
