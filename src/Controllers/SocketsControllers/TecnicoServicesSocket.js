@@ -120,7 +120,11 @@ class TecnicoServicesSocket {
             $match: {
               municipality_id: municipaly_id,
               deleted_at: { $exists: false },
-              profession_id: { $in: data.professionIds },
+              profession_id: { $in: data.professionIds }, // # FILTRO DE PROFESIONES VINCULADAS
+              $or: [
+                { active: true }, // Filtrar por activo
+                { active: { $exists: false } } // Incluir documentos donde el campo active no existe
+              ],
               status: "CREATED",
               is_public: true,
               converted_scheduled_date: { $gte: twoDaysAgo }

@@ -1,7 +1,6 @@
-// import {  connect } from 'mongoose';
-import { MONGODB_URI } from './config.js'
+import mongoose from 'mongoose';
 import { MongoClient, ServerApiVersion } from 'mongodb';
-
+import { MONGODB_URI } from './config.js';
 
 export class DBNames {
 
@@ -28,29 +27,25 @@ export class DBNames {
     static serviceOffers = "serviceOffers";
     static serviceOfferDetails = "serviceOfferDetails";
     static BackList = "BackList";
+    static course_catalog = "course_catalogs";
+    static details_technician_courses = "details_technician_courses";
+    static social_security_details_technician = "social_security_details_technicians";
+    static social_security_entity_catalog = "social_security_entity_catalogs";
     
 } 
 
+// Función para MongoClient nativo (mantiene compatibilidad)
 export const connectDB = async ( onConnect ) => {
-
-
     try {
-
         const Mongoclient = new MongoClient(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
         return Mongoclient.connect(async err => {
-           
             if(onConnect){
                 onConnect(Mongoclient)
             }
-            
         })
         
-        
     } catch (error) {
-
         console.log(error)
-        
     }
-
-}
+};

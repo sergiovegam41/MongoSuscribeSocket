@@ -5,7 +5,12 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon ./src/index.js --exec babel-node",
-    "start": "babel-node ./src/index.js"
+    "start": "babel-node ./src/index.js",
+    "seed": "babel-node ./src/Seeders/index.js",
+    "seed:courses": "babel-node ./src/Seeders/CourseCatalogSeeder.js",
+    "seed:details": "babel-node ./src/Seeders/DetailsTechnicianCoursesSeeder.js",
+    "seed:security": "babel-node ./src/Seeders/SocialSecurityDetailsTechnicianSeeder.js",
+    "seed:entities": "babel-node ./src/Seeders/SocialSecurityEntityCatalogSeeder.js"
   },
   "author": "",
   "license": "ISC",
