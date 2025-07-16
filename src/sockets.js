@@ -56,7 +56,7 @@ export default (io, MongoClient) => {
                 })
 
             } else if (validationMiddlewareResp == true) {
-                console.log("Next");
+                console.log("[iniciado] Next");
 
                 if (!actionsExecuted.includes(data.accion.toString())) {
                     init = true;
