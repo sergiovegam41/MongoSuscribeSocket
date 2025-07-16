@@ -106,6 +106,14 @@ class ClientOffersSocket {
         
             let finalData = [];
             
+            // Get service data to access profession_id
+            let service = await MongoClient.collection(DBNames.services).findOne({_id: ObjectId(serviceID)});
+            let professionData = null;
+            
+            if (service && service.profession_id) {
+                professionData = await MongoClient.collection(DBNames.professions).findOne({_id: ObjectId(service.profession_id)});
+            }
+            
             for (let offert of offerts) {
 
                 let detailsOffert = await MongoClient.collection(DBNames.serviceOfferDetails).find({
@@ -126,11 +134,12 @@ class ClientOffersSocket {
                 
 
                 finalData.push({
+                    professionData,
                     offert,
                     detailsOffert,
                     start,
                     ctnServices,
-                    user
+                    user,
                 });
             }
         
