@@ -117,6 +117,21 @@ class ClienteServicesSocket {
                         $sort: {_id: -1}
                     },
                     {
+                        $addFields: {
+                            technical_id_int: {
+                                $toInt: "$technical_id"
+                            }
+                        }
+                    },
+                    {
+                        $lookup: {
+                            from: "UserCopy",
+                            localField: "technical_id_int",
+                            foreignField: "id",
+                            as: "result_user"
+                        }
+                    },
+                    {
                         $limit: 1
                     },
                     {
@@ -124,6 +139,18 @@ class ClienteServicesSocket {
                             _id: 0,
                             last_service_id_no_rating: {
                                 $toString: "$_id"
+                            },
+                            name: {
+                                $arrayElemAt: ["$result_user.name", 0]
+                            },
+                            last_name: {
+                                $arrayElemAt: [
+                                    "$result_user.last_name",
+                                    0
+                                ]
+                            },
+                            photo_profile: {
+                                $arrayElemAt: ["$result_user.photo_profile", 0]
                             },
                             service_title: 1,
                             scheduled_date: 1
@@ -136,9 +163,9 @@ class ClienteServicesSocket {
                     console.log(client);
                     return {
                         last_service_id_no_rating: result[0].last_service_id_no_rating,
-                        name: client.session.user.name,
-                        last_name: client.session.user.last_name,
-                        photo_profile: client.session.user.photo_profile,
+                        name: result[0].name,
+                        last_name: result[0].last_name,
+                        photo_profile: result[0].photo_profile,
                         scheduled_date: result[0].scheduled_date,
                         service_title: result[0].service_title
 
