@@ -10,28 +10,28 @@ import SharedServicesSocket from "./Controllers/SocketsControllers/SharedService
 
 export default (io, MongoClient) => {
 
-    const changeStream = MongoClient.collection(DBNames.services).watch();
+    // const changeStream = MongoClient.collection(DBNames.services).watch();
 
-    changeStream.on('change', async (change) => {
+    // changeStream.on('change', async (change) => {
 
-        try {
+    //     try {
 
-            if (change.operationType === 'insert' || change.operationType === 'update') {
+    //         if (change.operationType === 'insert' || change.operationType === 'update') {
 
-                let service = await MongoClient.collection(DBNames.services).findOne({_id: change.documentKey._id || ""})
+    //             let service = await MongoClient.collection(DBNames.services).findOne({_id: change.documentKey._id || ""})
 
-                let profesion = await MongoClient.collection(DBNames.professions).findOne({_id: new ObjectId(service.profession_id)})
+    //             let profesion = await MongoClient.collection(DBNames.professions).findOne({_id: new ObjectId(service.profession_id)})
 
-                io.emit(`server:${TecnicoServicesSocket.servicesName}:refresh:${profesion.slug_name}`, true);
+    //             io.emit(`server:${TecnicoServicesSocket.servicesName}:refresh:${profesion.slug_name}`, true);
 
-            }
-        } catch (error) {
+    //         }
+    //     } catch (error) {
 
-            console.log(error)
+    //         console.log(error)
 
-        }
+    //     }
 
-    });
+    // });
 
     io.on('connection', async (socket) => {
 

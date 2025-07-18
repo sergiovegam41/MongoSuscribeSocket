@@ -104,7 +104,7 @@ class ClientRequestController {
                     "client_id": `${session.user_id}`,
                     "profession_id": `${form.professions_id}`,
                     "amount": `${priceService}`,
-                    "arl": data.arl.value === 'Si',
+                    "arl": data.arl.value === 'Si', 
                     "revenue": `${form.revenue}`,
                     "district": `${main_address.value.district}`,
                     "is_public": true,
