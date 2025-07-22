@@ -73,22 +73,22 @@ class TechnicianProfileService {
                 $addFields: {
                     "course_info.profession_id": {
                         $cond: {
-                            if: { $ne: ["$course_info", null] },
-                            then: { $toString: "$course_info.profession_id" },
+                            if: {$ne: ["$course_info", null]},
+                            then: {$toString: "$course_info.profession_id"},
                             else: null
                         }
                     },
                     "course_info._id": {
                         $cond: {
-                            if: { $ne: ["$course_info", null] },
-                            then: { $toString: "$course_info._id" },
+                            if: {$ne: ["$course_info", null]},
+                            then: {$toString: "$course_info._id"},
                             else: null
                         }
                     },
                     "social_security_entity._id": {
                         $cond: {
-                            if: { $ne: ["$social_security_entity", null] },
-                            then: { $toString: "$social_security_entity._id" },
+                            if: {$ne: ["$social_security_entity", null]},
+                            then: {$toString: "$social_security_entity._id"},
                             else: null
                         }
                     },
@@ -146,10 +146,10 @@ class TechnicianProfileService {
                         },
                         {
                             $sort: {
-                                created_at: -1
+                                _id: -1
                             }
                         },
-                        // Ordena por fecha descendente
+                        // Ordena por _id descendente (más recientes)
                         {
                             $limit: 5
                         }
@@ -211,15 +211,15 @@ class TechnicianProfileService {
                 $addFields: {
                     "professions_technical_details.profession_id": {
                         $cond: {
-                            if: { $ne: ["$professions_technical_details", null] },
-                            then: { $toObjectId: "$professions_technical_details.profession_id" },
+                            if: {$ne: ["$professions_technical_details", null]},
+                            then: {$toObjectId: "$professions_technical_details.profession_id"},
                             else: null
                         }
                     }
                 }
             },
             {
-                $lookup:{
+                $lookup: {
                     from: "professions",
                     localField: "professions_technical_details.profession_id",
                     foreignField: "_id",
@@ -227,7 +227,7 @@ class TechnicianProfileService {
                 }
             },
             {
-                $unwind:{
+                $unwind: {
                     path: "$professions",
                     preserveNullAndEmptyArrays: true
                 }
@@ -255,8 +255,8 @@ class TechnicianProfileService {
                             $cond: {
                                 if: {
                                     $and: [
-                                        { $ne: ["$course_info", null] },
-                                        { $ne: ["$course_info._id", null] }
+                                        {$ne: ["$course_info", null]},
+                                        {$ne: ["$course_info._id", null]}
                                     ]
                                 },
                                 then: "$course_info",
@@ -269,8 +269,8 @@ class TechnicianProfileService {
                             $cond: {
                                 if: {
                                     $and: [
-                                        { $ne: ["$social_security_entity", null] },
-                                        { $ne: ["$social_security_entity._id", null] }
+                                        {$ne: ["$social_security_entity", null]},
+                                        {$ne: ["$social_security_entity._id", null]}
                                     ]
                                 },
                                 then: "$social_security_entity",
@@ -281,7 +281,7 @@ class TechnicianProfileService {
                     technical_stars_services_detail: {
                         $addToSet: {
                             $cond: {
-                                if: { $ne: ["$technical_stars_services_detail", null] },
+                                if: {$ne: ["$technical_stars_services_detail", null]},
                                 then: "$technical_stars_services_detail",
                                 else: "$$REMOVE"
                             }
@@ -290,7 +290,7 @@ class TechnicianProfileService {
                     client_info: {
                         $addToSet: {
                             $cond: {
-                                if: { $ne: ["$client_info", null] },
+                                if: {$ne: ["$client_info", null]},
                                 then: "$client_info",
                                 else: "$$REMOVE"
                             }
@@ -302,7 +302,7 @@ class TechnicianProfileService {
                     professions: {
                         $addToSet: {
                             $cond: {
-                                if: { $ne: ["$professions", null] },
+                                if: {$ne: ["$professions", null]},
                                 then: "$professions",
                                 else: "$$REMOVE"
                             }
@@ -329,7 +329,7 @@ class TechnicianProfileService {
                                                 as: "course",
                                                 in: {
                                                     $cond: {
-                                                        if: { $ne: ["$$course", null] },
+                                                        if: {$ne: ["$$course", null]},
                                                         then: {
                                                             id: "$$course._id",
                                                             course_name: "$$course.course_name",
@@ -342,13 +342,13 @@ class TechnicianProfileService {
                                             }
                                         },
                                         as: "item",
-                                        cond: { $ne: ["$$item", null] }
+                                        cond: {$ne: ["$$item", null]}
                                     }
                                 }
                             },
                             in: {
                                 $cond: {
-                                    if: { $eq: [{ $size: "$$filtered" }, 0] },
+                                    if: {$eq: [{$size: "$$filtered"}, 0]},
                                     then: null,
                                     else: "$$filtered"
                                 }
@@ -366,7 +366,7 @@ class TechnicianProfileService {
                                                 as: "entity",
                                                 in: {
                                                     $cond: {
-                                                        if: { $ne: ["$$entity", null] },
+                                                        if: {$ne: ["$$entity", null]},
                                                         then: {
                                                             id: "$$entity._id",
                                                             type: "$$entity.type",
@@ -378,13 +378,13 @@ class TechnicianProfileService {
                                             }
                                         },
                                         as: "item",
-                                        cond: { $ne: ["$$item", null] }
+                                        cond: {$ne: ["$$item", null]}
                                     }
                                 }
                             },
                             in: {
                                 $cond: {
-                                    if: { $eq: [{ $size: "$$filtered" }, 0] },
+                                    if: {$eq: [{$size: "$$filtered"}, 0]},
                                     then: null,
                                     else: "$$filtered"
                                 }
@@ -394,67 +394,78 @@ class TechnicianProfileService {
                     comments: {
                         $let: {
                             vars: {
-                                filtered: {
-                                    $filter: {
-                                        input: {
-                                            $map: {
-                                                input: "$technical_stars_services_detail",
-                                                as: "comment",
-                                                in: {
-                                                    $cond: {
-                                                        if: { $ne: ["$$comment", null] },
-                                                        then: {
-                                                            comment: "$$comment.description",
-                                                            client_id: "$$comment.client_id",
-                                                            client_name: {
-                                                                $let: {
-                                                                    vars: {
-                                                                        client: {
-                                                                            $arrayElemAt: [
-                                                                                {
-                                                                                    $filter: {
-                                                                                        input: "$client_info",
-                                                                                        as: "c",
-                                                                                        cond: {
-                                                                                            $eq: [
-                                                                                                "$$c.id",
-                                                                                                "$$comment.client_id"
+                                sorted: {
+                                    $slice: [
+                                        {
+                                            $sortArray: {
+                                                input: {
+                                                    $filter: {
+                                                        input: {
+                                                            $map: {
+                                                                input: "$technical_stars_services_detail",
+                                                                as: "comment",
+                                                                in: {
+                                                                    $cond: {
+                                                                        if: {$ne: ["$$comment", null]},
+                                                                        then: {
+                                                                            comment: "$$comment.description",
+                                                                            client_id: "$$comment.client_id",
+                                                                            client_name: {
+                                                                                $let: {
+                                                                                    vars: {
+                                                                                        client: {
+                                                                                            $arrayElemAt: [
+                                                                                                {
+                                                                                                    $filter: {
+                                                                                                        input: "$client_info",
+                                                                                                        as: "c",
+                                                                                                        cond: {
+                                                                                                            $eq: [
+                                                                                                                "$$c.id",
+                                                                                                                "$$comment.client_id"
+                                                                                                            ]
+                                                                                                        }
+                                                                                                    }
+                                                                                                },
+                                                                                                0
                                                                                             ]
                                                                                         }
+                                                                                    },
+                                                                                    in: {
+                                                                                        $cond: {
+                                                                                            if: {$gt: ["$$client", null]},
+                                                                                            then: {
+                                                                                                $concat: ["$$client.name", " ", "$$client.last_name"]
+                                                                                            },
+                                                                                            else: "Cliente desconocido"
+                                                                                        }
                                                                                     }
-                                                                                },
-                                                                                0
-                                                                            ]
-                                                                        }
-                                                                    },
-                                                                    in: {
-                                                                        $cond: {
-                                                                            if: { $gt: ["$$client", null] },
-                                                                            then: {
-                                                                                $concat: ["$$client.name", " ", "$$client.last_name"]
+                                                                                }
                                                                             },
-                                                                            else: "Cliente desconocido"
-                                                                        }
+                                                                            qualification_start: "$$comment.value",
+                                                                            comment_id: "$$comment._id"
+                                                                        },
+                                                                        else: null
                                                                     }
                                                                 }
-                                                            },
-                                                            qualification_start: "$$comment.value"
+                                                            }
                                                         },
-                                                        else: null
+                                                        as: "item",
+                                                        cond: {$ne: ["$$item", null]}
                                                     }
-                                                }
+                                                },
+                                                sortBy: {comment_id: -1}
                                             }
                                         },
-                                        as: "item",
-                                        cond: { $ne: ["$$item", null] }
-                                    }
+                                        5
+                                    ]
                                 }
                             },
                             in: {
                                 $cond: {
-                                    if: { $eq: [{ $size: "$$filtered" }, 0] },
+                                    if: {$eq: [{$size: "$$sorted"}, 0]},
                                     then: null,
-                                    else: "$$filtered"
+                                    else: "$$sorted"
                                 }
                             }
                         }
@@ -470,7 +481,7 @@ class TechnicianProfileService {
                                                 as: "profession",
                                                 in: {
                                                     $cond: {
-                                                        if: { $ne: ["$$profession", null] },
+                                                        if: {$ne: ["$$profession", null]},
                                                         then: {
                                                             id: "$$profession._id",
                                                             profession_name: "$$profession.name",
@@ -482,13 +493,13 @@ class TechnicianProfileService {
                                             }
                                         },
                                         as: "item",
-                                        cond: { $ne: ["$$item", null] }
+                                        cond: {$ne: ["$$item", null]}
                                     }
                                 }
                             },
                             in: {
                                 $cond: {
-                                    if: { $eq: [{ $size: "$$filtered" }, 0] },
+                                    if: {$eq: [{$size: "$$filtered"}, 0]},
                                     then: null,
                                     else: "$$filtered"
                                 }

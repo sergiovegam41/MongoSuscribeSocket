@@ -224,7 +224,14 @@ static formatearPrecioCOP(precioString) {
       try {
         let session = await SessionsController.getCurrentSession(MongoClient, req)
 
-        let roadmap = await this.getRoadmapByTechnicalID(MongoClient,session.user_id.toString() );
+        if (!session || !session.user_id) {
+          return res.send({
+            success:false,
+            message: "Sesión no válida o usuario no encontrado",
+          })
+        }
+
+        let roadmap = await this.getRoadmapByTechnicalID(MongoClient, session.user_id.toString());
 
         let resultMap = {};
         roadmap.forEach((value, key) => {
