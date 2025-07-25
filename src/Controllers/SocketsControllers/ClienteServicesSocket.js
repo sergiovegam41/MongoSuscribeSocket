@@ -88,11 +88,18 @@ class ClienteServicesSocket {
 
             async function getUnratedService(client) {
 
+                const sevenDaysAgo = new Date();
+                sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+                sevenDaysAgo.setHours(0, 0, 0, 0);
+
                 const pipeline = [
                     {
                         $match: {
                             client_id: client.session.user_id.toString(),
-                            status: "FINISHED"
+                            status: "FINISHED",
+                            scheduled_date: {
+                                $gte: sevenDaysAgo
+                            }
                         }
                     },
                     {
