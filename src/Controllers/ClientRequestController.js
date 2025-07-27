@@ -17,7 +17,7 @@ class ClientRequestController {
         try {
             console.log("[DEBUG] createRequest - Iniciando función");
             console.log("[DEBUG] createRequest - req.body:", req.body);
-
+            
             let data = JSON.parse(req.body.data)
             console.log("[DEBUG] createRequest - data parseada:", data);
             
@@ -27,6 +27,14 @@ class ClientRequestController {
             console.log("[DEBUG] createRequest - Obteniendo sesión actual");
             let session = await SessionsController.getCurrentSession(MongoClient, req)
             console.log("[DEBUG] createRequest - session obtenida:", session);
+
+            // Si session.location es null, tomar location del req.body
+            if (!session.location && req.body.location) {
+                console.log("[DEBUG] createRequest - session.location es null, tomando del req.body");
+                let locationData = typeof req.body.location === 'string' ? JSON.parse(req.body.location) : req.body.location;
+                session.location = locationData;
+                console.log("[DEBUG] createRequest - location tomada del req.body:", session.location);
+            }
 
             //validar
             console.log("[DEBUG] createRequest - Validando formulario");
