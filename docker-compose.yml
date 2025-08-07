@@ -3,15 +3,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: mongo-suscribe-socket
+    container_name: dservices-socket
     restart: unless-stopped
     ports:
       - "3000:3000"
     networks:
-      - my-external-network
+      - global-network
     volumes:
       - .:/app
       - /app/node_modules
 networks:
-    my-external-network:
+    global-network:
         external: true
